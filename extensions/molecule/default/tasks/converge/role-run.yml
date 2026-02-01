@@ -1,0 +1,31 @@
+# Execute the collection role "run" against all driver-created instances.
+
+- name: "Molecule | Converge | Store run_fail2ban* role parameters in __testing_state"
+  ansible.builtin.include_tasks:
+    file: "../tasks/state_update.yml"
+  vars:
+    __testing_state_update:
+      # set all role configuration variables
+      run_fail2ban_state: "present"
+
+
+- name: "Molecule | Converge | Set run_fail2ban* role parameters as facts from __testing_state"
+  ansible.builtin.set_fact:
+    "{{ item['key'] }}": "{{ item['value'] }}"
+  loop: >-
+    {{
+      __testing_state
+      | ansible.builtin.dict2items
+      | ansible.builtin.selectattr('key', 'match', '^run_fail2ban_')
+      | ansible.builtin.list
+    }}
+
+
+- name: "Molecule | Converge | Include the foundata.fail2ban.run role"
+  ansible.builtin.include_role:
+    name: "foundata.fail2ban.run"
+  vars:
+  # vars: All run_fail2ban* variables are set as facts and passed this way to
+  #       the role. This enables persisting the values in __testing_state
+  #       and restoring them in later stages (e.g. verify) without manually
+  #       duplicating data across playbooks.

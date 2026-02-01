@@ -1,0 +1,8 @@
+
+# Execute the collection role "run" against all driver-created instances (cleanup / absent)
+
+- name: "Molecule | Cleanup | Include the foundata.fail2ban.run role"
+  ansible.builtin.include_role:
+    name: "foundata.fail2ban.run"
+  vars:
+    run_fail2ban_state: "absent"
