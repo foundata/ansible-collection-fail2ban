@@ -1,0 +1,154 @@
+# Internal role variables and values that must NOT be overridden by the user.
+#
+# Variables defined here usually override earlier definitions due to the high
+# precedence of this file. Each variable should have a concise comment above
+# it, describing its purpose and how it fits into the role's functionality.
+
+---
+
+# List of facts used by the role (gathered on a best-effort basis if needed).
+#
+# To identify which subset a fact belongs to during development, you can use
+# the following snippet:
+#
+# - ansible.builtin.setup:
+#     gather_subset:
+#       - '!min'
+#       - '<subset_name, see parameter doc for details>'
+__run_fail2ban_used_facts:
+  # from subset "distribution"
+  - "distribution"
+  - "distribution_major_version"
+  - "distribution_version"
+  - "os_family"
+
+
+# List of platforms this role supports and was designed for.
+#
+# A warning will be issued if the list contains values and the role is executed
+# on an unknown (not listed) platform, but execution will continue. Example:
+#
+# - name: "Fedora" # A ansible_facts value ('distribution' or 'os_family')
+#   versions: # A ansible_facts value ('distribution_major_version' or
+#     - "all" # 'distribution_version') or "all"
+# - name: "Ubuntu"
+#   versions:
+#     - "22.04"
+#     - "24.04"
+# - name: "RedHat"
+#   versions:
+#     - "all"
+# - name: "Debian"
+#   versions:
+#     - "all"
+__run_fail2ban_supported_platforms:
+  - name: "Debian"
+    versions:
+      - "12"
+      - "13"
+  - name: "Fedora"
+    versions:
+      - "43"
+      - "42"
+  - name: "openSUSE Leap"
+    versions:
+      - "16.0"
+  - name: "RedHat" # includes AlmaLinux, Rocky and CentOS Stream
+    versions:
+      - "9"
+      - "10"
+  - name: "Ubuntu"
+    versions:
+      - "24.04"
+      - "22.04"
+
+
+# List of package names to be installed when run_fail2ban_state is
+# set to "present".
+__run_fail2ban_packages_install:
+  - "fail2ban"
+
+
+# List of package names to be uninstalled when run_fail2ban_state is
+# set to "absent". This variable is useful when __run_fail2ban_packages_install
+# contains packages that are required for the managed software to function but
+# should not be removed during uninstallation, as doing so could break other
+# software. This is usually the case if there are common dependencies like
+# "curl" or "openssl" which typically should remain installed even after
+# uninstalling the software managed by this role.
+__run_fail2ban_packages_uninstall: "{{ run_fail2ban_packages_install }}"
+
+
+# List of package names to be removed unconditionally before installation
+# (e.g., to prevent conflicts or resolve incompatibilities).
+__run_fail2ban_packages_removal: []
+
+
+# List of paths of files and directories to be removed unconditionally after
+# installation. This is useful for removing default configuration resources
+# that would otherwise create confusion or conflict with custom configurations
+# managed by this role.
+__run_fail2ban_paths_removal: []
+
+
+# Configuration file paths, ownership, and permissions for the Postfix daemon.
+# These variables define the different locations of configuration files, the
+# include directory, and the Ansible-managed configuration file, ensuring
+# consistent file handling across distributions.
+__run_fail2ban_config_service_file_path: "/etc/fail2ban/fail2ban.conf"
+__run_fail2ban_config_service_file_owner: "root"
+__run_fail2ban_config_service_file_group: "root"
+__run_fail2ban_config_service_file_mode: "u=rw,g=r,o=r" # 0644
+
+__run_fail2ban_config_service_dropin_dir_path: "/etc/fail2ban/fail2ban.d"
+__run_fail2ban_config_service_dropin_dir_owner: "{{ __run_fail2ban_config_service_file_owner }}"
+__run_fail2ban_config_service_dropin_dir_group: "{{ __run_fail2ban_config_service_file_group }}"
+__run_fail2ban_config_service_dropin_dir_mode: "u=rwx,g=rx,o=rx" # 0755
+
+__run_fail2ban_config_service_dropin_file_path: "{{ __run_fail2ban_config_service_dropin_dir_path }}/{{ run_fail2ban_config_service_dropin_file_name }}"
+__run_fail2ban_config_service_dropin_file_path_default: "{{ __run_fail2ban_config_service_dropin_dir_path }}/99-managed.local" # needed to detect non-default names # noqa: yaml[line-length]
+__run_fail2ban_config_service_dropin_file_owner: "{{ __run_fail2ban_config_service_file_owner }}"
+__run_fail2ban_config_service_dropin_file_group: "{{ __run_fail2ban_config_service_file_group }}"
+__run_fail2ban_config_service_dropin_file_mode: "{{ __run_fail2ban_config_service_file_mode }}"
+
+__run_fail2ban_config_jail_dropin_dir_path: "/etc/fail2ban/jail.d"
+__run_fail2ban_config_jail_dropin_dir_owner: "{{ __run_fail2ban_config_service_file_owner }}"
+__run_fail2ban_config_jail_dropin_dir_group: "{{ __run_fail2ban_config_service_file_group }}"
+__run_fail2ban_config_jail_dropin_dir_mode: "{{ __run_fail2ban_config_service_dropin_dir_mode }}"
+
+__run_fail2ban_config_jail_dropin_file_path: "{{ __run_fail2ban_config_jail_dropin_dir_path }}/{{ run_fail2ban_config_jail_dropin_file_name }}"
+__run_fail2ban_config_jail_dropin_file_path_default: "{{ __run_fail2ban_config_jail_dropin_dir_path }}/99-managed.local" # needed to detect non-default names
+__run_fail2ban_config_jail_dropin_file_owner: "{{ __run_fail2ban_config_service_file_owner }}"
+__run_fail2ban_config_jail_dropin_file_group: "{{ __run_fail2ban_config_service_file_group }}"
+__run_fail2ban_config_jail_dropin_file_mode: "{{ __run_fail2ban_config_service_file_mode }}"
+
+__run_fail2ban_config_filter_dropin_dir_path: "/etc/fail2ban/filter.d"
+__run_fail2ban_config_filter_dropin_dir_owner: "{{ __run_fail2ban_config_service_file_owner }}"
+__run_fail2ban_config_filter_dropin_dir_group: "{{ __run_fail2ban_config_service_file_group }}"
+__run_fail2ban_config_filter_dropin_dir_mode: "{{ __run_fail2ban_config_service_dropin_dir_mode }}"
+
+__run_fail2ban_config_action_dropin_dir_path: "/etc/fail2ban/action.d"
+__run_fail2ban_config_action_dropin_dir_owner: "{{ __run_fail2ban_config_service_file_owner }}"
+__run_fail2ban_config_action_dropin_dir_group: "{{ __run_fail2ban_config_service_file_group }}"
+__run_fail2ban_config_action_dropin_dir_mode: "{{ __run_fail2ban_config_service_dropin_dir_mode }}"
+
+
+# Fail2ban daemon service name and executable paths.
+# These variables define the systemd service name for SSH daemon
+# and the paths to the fail2ban executables for service management and validation.
+__run_fail2ban_fail2ban_servicename: "fail2ban.service"
+__run_fail2ban_server_exec_path: "/usr/bin/fail2ban-server"
+__run_fail2ban_client_exec_path: "/usr/bin/fail2ban-client"
+__run_fail2ban_regex_exec_path: "/usr/bin/fail2ban-regex"
+
+
+# Paths of other executables and resources.
+__run_fail2ban_sha1sum_exec_path: "/usr/bin/sha1sum"
+__run_fail2ban_touch_exec_path: "/usr/bin/touch"
+__run_fail2ban_chmod_exec_path: "/usr/bin/chmod"
+__run_fail2ban_chown_exec_path: "/usr/bin/chown"
+
+
+### Override defaults of dependencies used by this role (if any).
+
+# nothing right now

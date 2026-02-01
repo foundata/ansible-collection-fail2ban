@@ -1,0 +1,89 @@
+# Configuration: Manage settings, like adapting or creating config files.
+
+---
+
+- name: "Config | Default | Ensure drop-in service config directory exists with proper permissions"
+  ansible.builtin.file:
+    path: "{{ __run_fail2ban_config_service_dropin_dir_path }}"
+    state: "directory"
+    owner: "{{ __run_fail2ban_config_service_dropin_dir_owner }}"
+    group: "{{ __run_fail2ban_config_service_dropin_dir_group }}"
+    mode: "{{ __run_fail2ban_config_service_dropin_dir_mode }}"
+  notify: "run_fail2ban: restart fail2ban.service"
+
+
+- name: "Config | Default | Create drop-in service config file"
+  ansible.builtin.template:
+    src: "drop-in.conf.j2"
+    dest: "{{ __run_fail2ban_config_service_dropin_file_path }}"
+    owner: "{{ __run_fail2ban_config_service_dropin_file_owner }}"
+    group: "{{ __run_fail2ban_config_service_dropin_file_group }}"
+    mode: "{{ __run_fail2ban_config_service_dropin_file_mode }}"
+  vars:
+    # Pass (and/or adjust) variables needed for the template
+    tpl_settings: "{{ run_fail2ban_service_settings }}"
+  notify: "run_fail2ban: restart fail2ban.service"
+
+
+- name: "Config | Default | Remove role's default service drop-in config file (if custom filename is used)"
+  ansible.builtin.file:
+    path: "{{ __run_fail2ban_config_service_dropin_file_path_default }}"
+    state: "absent"
+  when:
+    - __run_fail2ban_config_service_dropin_file_path != __run_fail2ban_config_service_dropin_file_path_default
+  notify:
+    - "run_fail2ban: restart fail2ban.service"
+
+
+- name: "Config | Default | Ensure drop-in jail config directory exists with proper permissions"
+  ansible.builtin.file:
+    path: "{{ __run_fail2ban_config_jail_dropin_dir_path }}"
+    state: "directory"
+    owner: "{{ __run_fail2ban_config_jail_dropin_dir_owner }}"
+    group: "{{ __run_fail2ban_config_jail_dropin_dir_group }}"
+    mode: "{{ __run_fail2ban_config_jail_dropin_dir_mode }}"
+  notify: "run_fail2ban: restart fail2ban.service"
+
+
+- name: "Config | Default | Create drop-in jail config file"
+  ansible.builtin.template:
+    src: "drop-in.conf.j2"
+    dest: "{{ __run_fail2ban_config_jail_dropin_file_path }}"
+    owner: "{{ __run_fail2ban_config_jail_dropin_file_owner }}"
+    group: "{{ __run_fail2ban_config_jail_dropin_file_group }}"
+    mode: "{{ __run_fail2ban_config_jail_dropin_file_mode }}"
+  vars:
+    # Pass (and/or adjust) variables needed for the template
+    tpl_settings: "{{ run_fail2ban_jail_settings }}"
+  notify: "run_fail2ban: restart fail2ban.service"
+
+
+- name: "Config | Default | Remove role's default jail drop-in config file (if custom filename is used)"
+  ansible.builtin.file:
+    path: "{{ __run_fail2ban_config_jail_dropin_file_path_default }}"
+    state: "absent"
+  when:
+    - __run_fail2ban_config_jail_dropin_file_path != __run_fail2ban_config_jail_dropin_file_path_default
+  notify:
+    - "run_fail2ban: restart fail2ban.service"
+
+
+- name: "Config | Default | Ensure drop-in filter config directory exists with proper permissions"
+  ansible.builtin.file:
+    path: "{{ __run_fail2ban_config_filter_dropin_dir_path }}"
+    state: "directory"
+    owner: "{{ __run_fail2ban_config_filter_dropin_dir_owner }}"
+    group: "{{ __run_fail2ban_config_filter_dropin_dir_group }}"
+    mode: "{{ __run_fail2ban_config_filter_dropin_dir_mode }}"
+  notify: "run_fail2ban: restart fail2ban.service"
+
+
+- name: "Config | Default | Ensure drop-in action config directory exists with proper permissions"
+  ansible.builtin.file:
+    path: "{{ __run_fail2ban_config_action_dropin_dir_path }}"
+    state: "directory"
+    owner: "{{ __run_fail2ban_config_action_dropin_dir_owner }}"
+    group: "{{ __run_fail2ban_config_action_dropin_dir_group }}"
+    mode: "{{ __run_fail2ban_config_action_dropin_dir_mode }}"
+  notify: "run_fail2ban: restart fail2ban.service"
+

@@ -1,0 +1,15 @@
+# Install: Tasks specific to: Red Hat (os_family or distribution)
+#
+# Only tasks specific to the platform and its functionality should be included
+# here. Tasks in this file will be executed before those defined in
+# setup/install/default.yml.
+
+---
+
+- name: "Setup | Install | Red Hat | Setup Extra Packages for Enterprise Linux (EPEL) repository"
+  ansible.builtin.package:
+    name:
+      - "epel-release"
+    state: "{{ 'latest' if run_fail2ban_autoupgrade else 'present' }}"
+  when:
+    - (ansible_facts['distribution'] | ansible.builtin.regex_replace(' ', '_') | ansible.builtin.lower) != 'fedora'

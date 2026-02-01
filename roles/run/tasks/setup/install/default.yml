@@ -1,0 +1,30 @@
+# Install: Manage basic resource setup, such as packages or service users.
+
+---
+
+- name: "Setup | Install | Default | Remove unwanted packages (e.g., to prevent conflicts or resolve incompatibilities)"
+  ansible.builtin.package:
+    name: "{{ __run_fail2ban_packages_removal }}"
+    state: "absent"
+  when:
+    - __run_fail2ban_packages_removal is ansible.builtin.defined
+    - (__run_fail2ban_packages_removal | ansible.builtin.length) > 0
+
+
+- name: "Setup | Install | Default | Install or upgrade packages"
+  ansible.builtin.package:
+    name: "{{ __run_fail2ban_packages_install }}"
+    state: "{{ 'latest' if run_fail2ban_autoupgrade else 'present' }}"
+  when:
+    - __run_fail2ban_packages_install is ansible.builtin.defined
+    - (__run_fail2ban_packages_install | ansible.builtin.length) > 0
+
+
+- name: "Setup | Install | Default | Remove unwanted files and directories (e.g., to prevent conflicts or resolve incompatibilities)"
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: "absent"
+  when:
+    - __run_fail2ban_paths_removal is ansible.builtin.defined
+    - (__run_fail2ban_paths_removal | ansible.builtin.length) > 0
+  loop: "{{ __run_fail2ban_paths_removal }}"

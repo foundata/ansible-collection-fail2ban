@@ -1,0 +1,86 @@
+# Main entry point for the role.
+
+---
+
+- name: "Main | Include role initialization tasks"
+  ansible.builtin.include_tasks:
+    file: "{{ role_path }}/tasks/init.yml"
+    apply:
+      tags:
+        - "always"
+        - "run_fail2ban_always"
+  tags:
+    - "always"
+    - "run_fail2ban_always"
+
+
+- name: "Main | Include setup tasks (install): best platform matches (if any), then default"
+  ansible.builtin.include_tasks:
+    file: "{{ __run_fail2ban_task_file }}"
+    apply:
+      tags:
+        - "run_fail2ban_setup"
+  vars:
+    __run_fail2ban_task_file: "{{ role_path }}/tasks/setup/install/{{ __run_fail2ban_loop_item }}"
+  when:
+    - run_fail2ban_state == 'present'
+    - __run_fail2ban_task_file is ansible.builtin.file
+  loop: "{{ __run_fail2ban_platform_filenames_most_specific_first + ['default.yml'] }}"
+  loop_control:
+    loop_var: "__run_fail2ban_loop_item"
+  tags:
+    - "run_fail2ban_setup"
+
+
+- name: "Main | Include configuration tasks: best platform matches (if any), then default"
+  ansible.builtin.include_tasks:
+    file: "{{ __run_fail2ban_task_file }}"
+    apply:
+      tags:
+        - "run_fail2ban_config"
+  vars:
+    __run_fail2ban_task_file: "{{ role_path }}/tasks/config/{{ __run_fail2ban_loop_item }}"
+  when:
+    - run_fail2ban_state == 'present'
+    - __run_fail2ban_task_file is ansible.builtin.file
+  loop: "{{ __run_fail2ban_platform_filenames_most_specific_first + ['default.yml'] }}"
+  loop_control:
+    loop_var: "__run_fail2ban_loop_item"
+  tags:
+    - "run_fail2ban_config"
+
+
+- name: "Main | Include service or daemon management tasks: best platform matches (if any), then default"
+  ansible.builtin.include_tasks:
+    file: "{{ __run_fail2ban_task_file }}"
+    apply:
+      tags:
+        - "run_fail2ban_service"
+  vars:
+    __run_fail2ban_task_file: "{{ role_path }}/tasks/service/{{ __run_fail2ban_loop_item }}"
+  when:
+    - run_fail2ban_state == 'present'
+    - __run_fail2ban_task_file is ansible.builtin.file
+  loop: "{{ __run_fail2ban_platform_filenames_most_specific_first + ['default.yml'] }}"
+  loop_control:
+    loop_var: "__run_fail2ban_loop_item"
+  tags:
+    - "run_fail2ban_service"
+
+
+- name: "Main | Include setup tasks (uninstall): best platform matches (if any), then default"
+  ansible.builtin.include_tasks:
+    file: "{{ __run_fail2ban_task_file }}"
+    apply:
+      tags:
+        - "run_fail2ban_setup"
+  vars:
+    __run_fail2ban_task_file: "{{ role_path }}/tasks/setup/uninstall/{{ __run_fail2ban_loop_item }}"
+  when:
+    - run_fail2ban_state == 'absent'
+    - __run_fail2ban_task_file is ansible.builtin.file
+  loop: "{{ __run_fail2ban_platform_filenames_most_specific_first + ['default.yml'] }}"
+  loop_control:
+    loop_var: "__run_fail2ban_loop_item"
+  tags:
+    - "run_fail2ban_setup"
