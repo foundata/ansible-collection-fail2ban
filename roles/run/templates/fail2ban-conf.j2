@@ -1,0 +1,59 @@
+{#-
+  Render settings (dict) to Fail2Ban INI config file format.
+
+  Rules:
+  - Top-level keys become INI sections (except special "content").
+  - Nested keys become options.
+  - Booleans render as true/false.
+  - Numbers render as-is.
+  - Lists render as space-separated.
+  - Multiline strings align continuation lines to the value column.
+  - Special top-level key "content" is appended raw at end (with a blank line before it).
+-#}
+
+# {{ ansible_managed }}
+{%  set settings = tpl_settings | ansible.builtin.default({}) %}
+{%  set raw_content = (settings.get('content') if settings is mapping else none) %}
+
+{%- if (settings | ansible.builtin.length) == 0 %}
+
+# No custom Fail2Ban service settings managed by Ansible.
+{%  else %}
+
+{%-   for section in ((settings
+                       | ansible.builtin.dict2items
+                       | rejectattr('key', 'equalto', 'content')
+                       | ansible.builtin.sort(attribute='key'))) %}
+
+[{{ section['key'] }}]
+{%      for opt in ((section['value'] | ansible.builtin.default({}))
+                    | ansible.builtin.dict2items
+                    | ansible.builtin.sort(attribute='key')) %}
+{%        set k = opt['key'] %}
+{%        set v = opt['value'] %}
+{%        if v is boolean %}
+{{ k }} = {{ 'true' if v else 'false' }}
+{%        elif v is number %}
+{{ k }} = {{ v }}
+{%        elif (v is sequence) and (v is not string) %}
+{{ k }} = {{ v | map('string') | join(' ') }}
+{%        else -%}
+{%          set s = v | string %}
+{%          if '\n' in s %}
+{%            set lines = s.splitlines() %}
+{%            set pad = ' ' * (k | ansible.builtin.length + 3) %}
+{{ k }} = {{ lines[0] }}
+{%            for line in lines[1:] %}
+{{ pad }}{{ line }}
+{%            endfor %}
+{%          else %}
+{{ k }} = {{ s }}
+{%          endif %}
+{%        endif %}
+{%      endfor %}
+{%    endfor %}
+
+{%    if raw_content is not none and (raw_content | string | trim) != '' %}
+{{ raw_content | string | trim }}
+{%    endif %}
+{%  endif %}

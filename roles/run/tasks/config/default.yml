@@ -14,7 +14,7 @@
 
 - name: "Config | Default | Create drop-in service config file"
   ansible.builtin.template:
-    src: "drop-in.conf.j2"
+    src: "fail2ban-conf.j2"
     dest: "{{ __run_fail2ban_config_service_dropin_file_path }}"
     owner: "{{ __run_fail2ban_config_service_dropin_file_owner }}"
     group: "{{ __run_fail2ban_config_service_dropin_file_group }}"
@@ -47,7 +47,7 @@
 
 - name: "Config | Default | Create drop-in jail config file"
   ansible.builtin.template:
-    src: "drop-in.conf.j2"
+    src: "fail2ban-conf.j2"
     dest: "{{ __run_fail2ban_config_jail_dropin_file_path }}"
     owner: "{{ __run_fail2ban_config_jail_dropin_file_owner }}"
     group: "{{ __run_fail2ban_config_jail_dropin_file_group }}"
