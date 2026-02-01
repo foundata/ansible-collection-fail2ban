@@ -256,16 +256,15 @@ argument_specs:
           Example:
 
           ```yaml
-          run_fail2ban_actions:
-            dropbear-complex:
-              INCLUDES:
-                before: "common.conf"
-              Definition:
-                _daemon: "dropbear"
-                failregex: |
+          dropbear-complex:
+            INCLUDES:
+              before: "common.conf"
+            Definition:
+              _daemon: "dropbear"
+              failregex: |
 
-                  ^[Ll]ogin attempt for nonexistent user ('.*' )?from <HOST>:\d+$
-                  ^[Bb]ad (PAM )?password attempt for .+ from <HOST>(:\d+)?$
+                ^[Ll]ogin attempt for nonexistent user ('.*' )?from <HOST>:\d+$
+                ^[Bb]ad (PAM )?password attempt for .+ from <HOST>(:\d+)?$
           ```
 
           will create `filter.d/dropbear-complex.local` with the content:
@@ -325,14 +324,14 @@ argument_specs:
           Example:
 
           ```yaml
-            my-complex-notify-slack:
-              INCLUDES:
-                before: "foobar.conf"
-              Definition:
-                actionban: >-
-                  curl -X POST -H 'Content-type: application/json' --data '{"text":"Banned <ip>"}' ...
-                actionunban: >-
-                  curl -X POST -H 'Content-type: application/json' --data '{"text":"Unbanned <ip>"}' ...
+          my-complex-notify-slack:
+            INCLUDES:
+              before: "foobar.conf"
+            Definition:
+              actionban: >-
+                curl -X POST -H 'Content-type: application/json' --data '{"text":"Banned <ip>"}' ...
+              actionunban: >-
+                curl -X POST -H 'Content-type: application/json' --data '{"text":"Unbanned <ip>"}' ...
           ```
 
           will create `action.d/my-complex-notify-slack.local` with the content:
