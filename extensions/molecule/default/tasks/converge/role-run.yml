@@ -7,6 +7,51 @@
     __testing_state_update:
       # set all role configuration variables
       run_fail2ban_state: "present"
+      run_fail2ban_service_settings:
+        DEFAULT:
+          loglevel: "INFO"
+          logtarget: "/var/log/fail2ban.log"
+          ignoreip: "127.0.0.1/8 ::1 192.168.0.0/16 10.0.0.0/8 my-trusted-host.example.com"
+        Thread:
+          stacksize: 0
+      run_fail2ban_config_service_dropin_file_name: "99-custom-dropin-service.local"
+
+      run_fail2ban_jail_settings:
+        DEFAULT:
+          enabled: false
+          maxretry: 3
+          ignoreself: true
+          ignoreip: "127.0.0.1/8 ::1 192.168.0.0/16 10.0.0.0/8 my-trusted-host.example.com"
+          bantime: "15m"
+          findtime: "10m"
+          usedns: false
+          logencoding: "utf-8"
+          destemail: "root123@localhost"
+          sender: "root123@<fq-hostname>" # <fq-hostname> placeholder provided by Fail2ban
+          # FIXME hier spielt die music! Hier brauche ich noch rollenmagic
+          backend: "auto" # FIXME this is a Fail2ban thing, I want an own mechanism
+          banaction: "iptables-multiport"
+          banaction_allports: "iptables-allports"
+        sshd:
+          enabled: true
+      run_fail2ban_config_jail_dropin_file_name: "99-custom-dropin-jail.local"
+
+      run_fail2ban_custom_filters:
+        dropbear-complex:
+          INCLUDES:
+            before: "common.conf"
+          Definition:
+            _daemon: "dropbear"
+            failregex: |-
+              ^[Ll]ogin attempt for nonexistent user ('.*' )?from <HOST>:\d+$
+              ^[Bb]ad (PAM )?password attempt for .+ from <HOST>(:\d+)?$
+
+      run_fail2ban_custom_actions:
+        my-complex-notify-slack:
+          content: |
+            [Definition]
+            actionban = curl -X POST -H 'Content-type: application/json' --data '{"text":"Banned <ip>"}' ...
+            actionunban = curl -X POST -H 'Content
 
 
 - name: "Molecule | Converge | Set run_fail2ban* role parameters as facts from __testing_state"
@@ -24,7 +69,6 @@
 - name: "Molecule | Converge | Include the foundata.fail2ban.run role"
   ansible.builtin.include_role:
     name: "foundata.fail2ban.run"
-  vars:
   # vars: All run_fail2ban* variables are set as facts and passed this way to
   #       the role. This enables persisting the values in __testing_state
   #       and restoring them in later stages (e.g. verify) without manually
