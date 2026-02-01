@@ -16,8 +16,6 @@ The `foundata.fail2ban.run` Ansible role (part of the `foundata.fail2ban` Ansibl
 
 
 
-
-
 ## Example playbooks, using this role<a id="examples"></a>
 
 Installation with automatic upgrade:
@@ -96,93 +94,3 @@ See `min_ansible_version` in [`meta/main.yml`](./meta/main.yml) and `__run_fail2
 ## External requirements<a id="requirements"></a>
 
 There are no special requirements not covered by Ansible itself.
-
-
-
-
-
-
-
-
-
-
-## Features<a id="features"></a>
-
-Main features:
-
-* Sane, secure defaults:
-  * No jails enabled by default (explicit opt-in philosophy).
-  * Auto-detection of firewall backend (`nftables`, `firewalld`, or `iptables`) and log backend (`systemd` or `auto`).
-  * Sensible ban times and retry limits.
-  * See `__run_fail2ban_jail_defaults_defaults` in `./vars/main.yml` for a complete list.
-* Simple jail management: Enable and configure any jail with a single dictionary entry.
-* Full flexibility: Any fail2ban option can be passed through without the role needing explicit support.
-* Drop-in configuration: Preserves distribution defaults while applying managed settings.
-* Optional custom filter and action support: Define your own intrusion patterns and ban actions when needed.
-* Cross-platform: Works across major Linux distributions with automatic adaptation to platform-specific defaults.
-
-
-
-
-## What this role controls<a id="what-this-role-controls"></a>
-
-fail2ban uses a layered configuration system with separate files for different concerns. This role manages the following components:
-```
-/etc/fail2ban/
-│
-├── fail2ban.conf                    # Daemon settings (logging, database, socket)
-│   └── Controlled by: run_fail2ban_settings
-│
-├── jail.d/
-│   └── 00-managed.conf              # Jail defaults + individual jail definitions
-│       └── Controlled by: run_fail2ban_jail_defaults
-│                          run_fail2ban_jails
-│                          run_fail2ban_ignoreip
-│                          run_fail2ban_config_dropin_file_name
-│
-├── filter.d/
-│   ├── sshd.conf                    # Built-in filter (not managed)
-│   ├── nginx-http-auth.conf         # Built-in filter (not managed)
-│   └── <custom>.conf                # Custom filters (optional)
-│       └── Controlled by: run_fail2ban_custom_filters
-│
-└── action.d/
-    ├── nftables-multiport.conf      # Built-in action (not managed)
-    ├── iptables-multiport.conf      # Built-in action (not managed)
-    └── <custom>.conf                # Custom actions (optional)
-        └── Controlled by: run_fail2ban_custom_actions
-```
-
-### Configuration layers explained
-
-**Daemon settings (`fail2ban.conf`)**
-Controls the fail2ban service itself: logging level and destination, database location and purge age, PID file and socket paths. Most users can leave these at defaults.
-
-**Jail definitions (`jail.d/`)**
-Jails are the core concept of fail2ban. Each jail:
-- Monitors one or more log files for intrusion patterns
-- Uses a *filter* to detect failures via regex
-- Triggers an *action* (typically a firewall ban) after threshold is reached
-
-This role uses a drop-in file (`00-managed.conf`) to define jail defaults and individual jails, leaving distribution-provided configurations untouched.
-
-**Filters (`filter.d/`)**
-Filters contain the regex patterns that identify failed authentication attempts or other malicious activity in log files. fail2ban ships with filters for most common services (SSH, nginx, Apache, Postfix, etc.). Custom filters are only needed for applications with unique log formats.
-
-**Actions (`action.d/`)**
-Actions define what happens when an IP is banned or unbanned. The default action adds firewall rules to block the offending IP. fail2ban ships with actions for `nftables`, `iptables`, `firewalld`, and various notification methods. Custom actions are typically only needed for specialized notifications (Slack, PagerDuty, etc.).
-
-### How jails reference filters and actions
-
-A jail *references* filters and actions by name:
-```ini
-[my-custom-app]
-enabled   = true
-filter    = my-custom-app           # → Uses filter.d/my-custom-app.conf
-action    = nftables-multiport      # → Uses action.d/nftables-multiport.conf
-            notify-slack            # → Uses action.d/notify-slack.conf
-logpath   = /var/log/my-app.log
-maxretry  = 5
-```
-
-Filters and actions are reusable components—one filter can be used by multiple jails, a
