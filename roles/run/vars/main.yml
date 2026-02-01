@@ -106,7 +106,7 @@ __run_fail2ban_config_service_dropin_dir_group: "{{ __run_fail2ban_config_servic
 __run_fail2ban_config_service_dropin_dir_mode: "u=rwx,g=rx,o=rx" # 0755
 
 __run_fail2ban_config_service_dropin_file_path: "{{ __run_fail2ban_config_service_dropin_dir_path }}/{{ run_fail2ban_config_service_dropin_file_name }}"
-__run_fail2ban_config_service_dropin_file_path_default: "{{ __run_fail2ban_config_service_dropin_dir_path }}/99-managed.local" # needed to detect non-default names # noqa: yaml[line-length]
+__run_fail2ban_config_service_dropin_file_path_default: "{{ __run_fail2ban_config_service_dropin_dir_path }}/99-managed.local" # noqa: yaml[line-length] # needed to detect non-default names
 __run_fail2ban_config_service_dropin_file_owner: "{{ __run_fail2ban_config_service_file_owner }}"
 __run_fail2ban_config_service_dropin_file_group: "{{ __run_fail2ban_config_service_file_group }}"
 __run_fail2ban_config_service_dropin_file_mode: "{{ __run_fail2ban_config_service_file_mode }}"
@@ -127,10 +127,18 @@ __run_fail2ban_config_filter_dropin_dir_owner: "{{ __run_fail2ban_config_service
 __run_fail2ban_config_filter_dropin_dir_group: "{{ __run_fail2ban_config_service_file_group }}"
 __run_fail2ban_config_filter_dropin_dir_mode: "{{ __run_fail2ban_config_service_dropin_dir_mode }}"
 
+__run_fail2ban_config_filter_dropin_file_owner: "root"
+__run_fail2ban_config_filter_dropin_file_group: "root"
+__run_fail2ban_config_filter_dropin_file_mode: "u=rw,g=r,o=r" # 0644
+
 __run_fail2ban_config_action_dropin_dir_path: "/etc/fail2ban/action.d"
 __run_fail2ban_config_action_dropin_dir_owner: "{{ __run_fail2ban_config_service_file_owner }}"
 __run_fail2ban_config_action_dropin_dir_group: "{{ __run_fail2ban_config_service_file_group }}"
 __run_fail2ban_config_action_dropin_dir_mode: "{{ __run_fail2ban_config_service_dropin_dir_mode }}"
+
+__run_fail2ban_config_action_dropin_file_owner: "root"
+__run_fail2ban_config_action_dropin_file_group: "root"
+__run_fail2ban_config_action_dropin_file_mode: "u=rw,g=r,o=r" # 0644
 
 
 # Fail2ban daemon service name and executable paths.

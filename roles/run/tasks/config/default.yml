@@ -2,6 +2,8 @@
 
 ---
 
+## Service
+
 - name: "Config | Default | Ensure drop-in service config directory exists with proper permissions"
   ansible.builtin.file:
     path: "{{ __run_fail2ban_config_service_dropin_dir_path }}"
@@ -9,7 +11,8 @@
     owner: "{{ __run_fail2ban_config_service_dropin_dir_owner }}"
     group: "{{ __run_fail2ban_config_service_dropin_dir_group }}"
     mode: "{{ __run_fail2ban_config_service_dropin_dir_mode }}"
-  notify: "run_fail2ban: restart fail2ban.service"
+  notify:
+    - "run_fail2ban: restart fail2ban.service"
 
 
 - name: "Config | Default | Create drop-in service config file"
@@ -22,7 +25,8 @@
   vars:
     # Pass (and/or adjust) variables needed for the template
     tpl_settings: "{{ run_fail2ban_service_settings }}"
-  notify: "run_fail2ban: restart fail2ban.service"
+  notify:
+    - "run_fail2ban: restart fail2ban.service"
 
 
 - name: "Config | Default | Remove role's default service drop-in config file (if custom filename is used)"
@@ -34,6 +38,7 @@
   notify:
     - "run_fail2ban: restart fail2ban.service"
 
+## Jails
 
 - name: "Config | Default | Ensure drop-in jail config directory exists with proper permissions"
   ansible.builtin.file:
@@ -42,7 +47,8 @@
     owner: "{{ __run_fail2ban_config_jail_dropin_dir_owner }}"
     group: "{{ __run_fail2ban_config_jail_dropin_dir_group }}"
     mode: "{{ __run_fail2ban_config_jail_dropin_dir_mode }}"
-  notify: "run_fail2ban: restart fail2ban.service"
+  notify:
+    - "run_fail2ban: restart fail2ban.service"
 
 
 - name: "Config | Default | Create drop-in jail config file"
@@ -55,7 +61,8 @@
   vars:
     # Pass (and/or adjust) variables needed for the template
     tpl_settings: "{{ run_fail2ban_jail_settings }}"
-  notify: "run_fail2ban: restart fail2ban.service"
+  notify:
+    - "run_fail2ban: restart fail2ban.service"
 
 
 - name: "Config | Default | Remove role's default jail drop-in config file (if custom filename is used)"
@@ -68,6 +75,8 @@
     - "run_fail2ban: restart fail2ban.service"
 
 
+## Custom filter file(s)
+
 - name: "Config | Default | Ensure drop-in filter config directory exists with proper permissions"
   ansible.builtin.file:
     path: "{{ __run_fail2ban_config_filter_dropin_dir_path }}"
@@ -75,8 +84,43 @@
     owner: "{{ __run_fail2ban_config_filter_dropin_dir_owner }}"
     group: "{{ __run_fail2ban_config_filter_dropin_dir_group }}"
     mode: "{{ __run_fail2ban_config_filter_dropin_dir_mode }}"
-  notify: "run_fail2ban: restart fail2ban.service"
+  notify:
+    - "run_fail2ban: restart fail2ban.service"
 
+
+- name: "Config | Default | Create filter config files"
+  ansible.builtin.template:
+    src: "fail2ban-conf.j2"
+    dest: "{{ __run_fail2ban_config_filter_dropin_dir_path }}/{{ __run_fail2ban_loop_file_name }}"
+    owner: "{{ __run_fail2ban_config_filter_dropin_file_owner }}"
+    group: "{{ __run_fail2ban_config_filter_dropin_file_group }}"
+    mode: "{{ __run_fail2ban_config_filter_dropin_file_mode }}"
+  vars:
+    __run_fail2ban_loop_file_name: >-
+      {{
+        item['key']
+        | ansible.builtin.lower
+        | ansible.builtin.regex_replace('[^a-z0-9._-]', '_')
+        | ansible.builtin.regex_replace('_+', '_')
+        | ansible.builtin.regex_replace('^_|_$', '')
+      }}.local
+    # Pass (and/or adjust) variables needed for the template
+    tpl_settings: "{{ item['value'] }}"
+  loop: >-
+    {{
+      run_fail2ban_custom_filters
+      | ansible.builtin.default({})
+      | ansible.builtin.dict2items
+    }}
+  loop_control:
+    label: "{{ __run_fail2ban_config_filter_dropin_dir_path }}/{{ __run_fail2ban_loop_file_name }}"
+  when:
+    - ((run_fail2ban_custom_filters | ansible.builtin.default({})) | ansible.builtin.length) > 0
+  notify:
+    - "run_fail2ban: restart fail2ban.service"
+
+
+## Custom action file(s)
 
 - name: "Config | Default | Ensure drop-in action config directory exists with proper permissions"
   ansible.builtin.file:
@@ -85,5 +129,37 @@
     owner: "{{ __run_fail2ban_config_action_dropin_dir_owner }}"
     group: "{{ __run_fail2ban_config_action_dropin_dir_group }}"
     mode: "{{ __run_fail2ban_config_action_dropin_dir_mode }}"
-  notify: "run_fail2ban: restart fail2ban.service"
+  notify:
+    - "run_fail2ban: restart fail2ban.service"
 
+
+- name: "Config | Default | Create action config files"
+  ansible.builtin.template:
+    src: "fail2ban-conf.j2"
+    dest: "{{ __run_fail2ban_config_action_dropin_dir_path }}/{{ __run_fail2ban_loop_file_name }}"
+    owner: "{{ __run_fail2ban_config_action_dropin_file_owner }}"
+    group: "{{ __run_fail2ban_config_action_dropin_file_group }}"
+    mode: "{{ __run_fail2ban_config_action_dropin_file_mode }}"
+  vars:
+    __run_fail2ban_loop_file_name: >-
+      {{
+        item['key']
+        | ansible.builtin.lower
+        | ansible.builtin.regex_replace('[^a-z0-9._-]', '_')
+        | ansible.builtin.regex_replace('_+', '_')
+        | ansible.builtin.regex_replace('^_|_$', '')
+      }}.local
+    # Pass (and/or adjust) variables needed for the template
+    tpl_settings: "{{ item['value'] }}"
+  loop: >-
+    {{
+      run_fail2ban_custom_actions
+      | ansible.builtin.default({})
+      | ansible.builtin.dict2items
+    }}
+  loop_control:
+    label: "{{ __run_fail2ban_config_action_dropin_dir_path }}/{{ __run_fail2ban_loop_file_name }}"
+  when:
+    - ((run_fail2ban_custom_actions | ansible.builtin.default({})) | ansible.builtin.length) > 0
+  notify:
+    - "run_fail2ban: restart fail2ban.service"
