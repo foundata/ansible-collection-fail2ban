@@ -31,6 +31,40 @@
       }}
 
 
+- name: "Molecule | Verify | Check if fail2ban drop-in configuration file exists"
+  ansible.builtin.stat:
+    path: "{{ __run_fail2ban_config_service_dropin_file_path }}"
+  register: __testing_dropin_file
+
+
+- name: "Molecule | Verify | Assert fail2ban drop-in configuration file exists"
+  ansible.builtin.assert:
+    that:
+      - __testing_dropin_file['stat']['exists']
+    fail_msg: "The fail2ban drop-in configuration file '{{ __run_fail2ban_config_service_dropin_file_path }}' does not exist."
+    success_msg: "The fail2ban drop-in configuration file '{{ __run_fail2ban_config_service_dropin_file_path }}' exists."
+
+
+- name: "Molecule | Verify | Check if default fail2ban drop-in configuration file does exists (if custom filename is used)"
+  ansible.builtin.stat:
+    path: "{{ __run_fail2ban_config_service_dropin_file_path_default }}"
+  when:
+    - __run_fail2ban_config_service_dropin_file_path != __run_fail2ban_config_service_dropin_file_path_default
+  register: __testing_dropin_file_default
+
+
+- name: "Molecule | Verify | Assert default fail2ban drop-in configuration file does not exists (if custom filename is used)"
+  ansible.builtin.assert:
+    that:
+      - __testing_dropin_file_default['stat']['exists'] is ansible.builtin.false
+    fail_msg: >-
+      The default fail2ban drop-in configuration file '{{ __run_fail2ban_config_service_dropin_file_path_default }}' exists (even though a custom filename is used).
+    success_msg: >-
+      The default fail2ban drop-in configuration file '{{ __run_fail2ban_config_service_dropin_file_path_default }}' does not exist (valid as custom filename is used).
+  when:
+    - __run_fail2ban_config_service_dropin_file_path != __run_fail2ban_config_service_dropin_file_path_default
+
+
 - name: "Molecule | Verify | Gather service facts"
   ansible.builtin.service_facts:
 
