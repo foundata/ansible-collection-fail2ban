@@ -3,9 +3,20 @@
 This repository contains the `foundata.fail2ban` Ansible Collection.
 
 
+<div align="center" id="project-readme-header">
+<br>
+<br>
+
+**⭐ Found this useful? Support open-source and star this project:**
+
+[![GitHub repository](https://img.shields.io/github/stars/foundata/ansible-collection-fail2ban.svg)](https://github.com/foundata/ansible-collection-fail2ban)
+
+<br>
+</div>
+
+
 
 ## Table of contents<a id="toc"></a>
-
 - [Included content](#content)
 - [Dependencies](#dependencies)
 - [Licensing, copyright](#licensing-copyright)
