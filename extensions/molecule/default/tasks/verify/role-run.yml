@@ -8,24 +8,28 @@
 
 ## Preparation
 
-- name: "Molecule | Verify | Set run_fail2ban* role parameters as facts from __testing_state"
+- name: "Molecule | Verify | Set run_fail2ban_* parameters as facts from __testing_state"
   ansible.builtin.set_fact:
     "{{ item['key'] }}": "{{ item['value'] }}"
   loop: >-
     {{
-      __testing_state
+      (__testing_state | default({}, true))
       | ansible.builtin.dict2items
       | ansible.builtin.selectattr('key', 'match', '^run_fail2ban_')
       | ansible.builtin.list
     }}
 
 
-- name: "Molecule | Verify | Set / overwrite other expected configuration or testing data "
+- name: "Molecule | Verify | Set other expected or needed facts"
   ansible.builtin.set_fact:
     __run_fail2ban_config_service_dropin_file_path: >-
       {{ __run_fail2ban_config_service_dropin_dir_path }}/{{ run_fail2ban_config_service_dropin_file_name }}
     __run_fail2ban_config_jail_dropin_file_path: >-
       {{ __run_fail2ban_config_jail_dropin_dir_path }}/{{ run_fail2ban_config_jail_dropin_file_name }}
+    __testing_custom_filter_file_path: >-
+      {{ __run_fail2ban_config_filter_dropin_dir_path }}/dropbear-complex.local
+    __testing_custom_action_file_path: >-
+      {{ __run_fail2ban_config_action_dropin_dir_path }}/my-complex-notify-slack.local
     __testing_journalctl_executable: >-
       {{
         '/bin/journalctl'
@@ -118,14 +122,134 @@
     - __run_fail2ban_config_jail_dropin_file_path != __run_fail2ban_config_jail_dropin_file_path_default
 
 
+## Jail drop-in file contents
+
+- name: "Molecule | Verify | Read jail drop-in config file content"
+  ansible.builtin.slurp:
+    src: "{{ __run_fail2ban_config_jail_dropin_file_path }}"
+  register: __testing_jail_dropin_content
+
+
+- name: "Molecule | Verify | Set jail drop-in config file content as fact"
+  ansible.builtin.set_fact:
+    __testing_jail_dropin_decoded: >-
+      {{ __testing_jail_dropin_content['content'] | ansible.builtin.b64decode }}
+
+
+- name: "Molecule | Verify | Assert jail drop-in contains expected directives"
+  ansible.builtin.assert:
+    that:
+      - "'[DEFAULT]' in __testing_jail_dropin_decoded"
+      - "'bantime = 15m' in __testing_jail_dropin_decoded"
+      - "'maxretry = 3' in __testing_jail_dropin_decoded"
+      - "'enabled = false' in __testing_jail_dropin_decoded"
+      - "'destemail = root123@localhost' in __testing_jail_dropin_decoded"
+      - "'ignoreself = true' in __testing_jail_dropin_decoded"
+      - "'usedns = false' in __testing_jail_dropin_decoded"
+      - "'logencoding = utf-8' in __testing_jail_dropin_decoded"
+      - "'backend = auto' in __testing_jail_dropin_decoded"
+      - "'banaction = iptables-multiport' in __testing_jail_dropin_decoded"
+      - "'banaction_allports = iptables-allports' in __testing_jail_dropin_decoded"
+      - "'findtime = 10m' in __testing_jail_dropin_decoded"
+    fail_msg: >-
+      The jail drop-in config file is missing expected directives.
+      Actual content: {{ __testing_jail_dropin_decoded }}
+    success_msg: >-
+      The jail drop-in config file contains all expected directives.
+
+
 ## Custom filter file(s) existence
 
-# FIXME
+- name: "Molecule | Verify | Check if custom filter config file exists"
+  ansible.builtin.stat:
+    path: "{{ __testing_custom_filter_file_path }}"
+  register: __testing_custom_filter_file
+
+
+- name: "Molecule | Verify | Assert custom filter config file exists"
+  ansible.builtin.assert:
+    that:
+      - __testing_custom_filter_file['stat']['exists']
+    fail_msg: >-
+      The custom filter config file '{{ __testing_custom_filter_file_path }}' does not exist.
+    success_msg: >-
+      The custom filter config file '{{ __testing_custom_filter_file_path }}' exists.
+
+
+## Custom filter file(s) contents
+
+- name: "Molecule | Verify | Read custom filter config file content"
+  ansible.builtin.slurp:
+    src: "{{ __testing_custom_filter_file_path }}"
+  register: __testing_custom_filter_content
+
+
+- name: "Molecule | Verify | Set custom filter config file content as fact"
+  ansible.builtin.set_fact:
+    __testing_custom_filter_decoded: >-
+      {{ __testing_custom_filter_content['content'] | ansible.builtin.b64decode }}
+
+
+- name: "Molecule | Verify | Assert custom filter contains expected directives"
+  ansible.builtin.assert:
+    that:
+      - "'[Definition]' in __testing_custom_filter_decoded"
+      - "'_daemon = dropbear' in __testing_custom_filter_decoded"
+      - "'failregex' in __testing_custom_filter_decoded"
+      - "'nonexistent user' in __testing_custom_filter_decoded"
+      - "'[INCLUDES]' in __testing_custom_filter_decoded"
+      - "'before = common.conf' in __testing_custom_filter_decoded"
+    fail_msg: >-
+      The custom filter config file is missing expected directives.
+      Actual content: {{ __testing_custom_filter_decoded }}
+    success_msg: >-
+      The custom filter config file contains all expected directives.
 
 
 ## Custom action file(s) existence
 
-# FIXME
+- name: "Molecule | Verify | Check if custom action config file exists"
+  ansible.builtin.stat:
+    path: "{{ __testing_custom_action_file_path }}"
+  register: __testing_custom_action_file
+
+
+- name: "Molecule | Verify | Assert custom action config file exists"
+  ansible.builtin.assert:
+    that:
+      - __testing_custom_action_file['stat']['exists']
+    fail_msg: >-
+      The custom action config file '{{ __testing_custom_action_file_path }}' does not exist.
+    success_msg: >-
+      The custom action config file '{{ __testing_custom_action_file_path }}' exists.
+
+
+## Custom action file(s) contents
+
+- name: "Molecule | Verify | Read custom action config file content"
+  ansible.builtin.slurp:
+    src: "{{ __testing_custom_action_file_path }}"
+  register: __testing_custom_action_content
+
+
+- name: "Molecule | Verify | Set custom action config file content as fact"
+  ansible.builtin.set_fact:
+    __testing_custom_action_decoded: >-
+      {{ __testing_custom_action_content['content'] | ansible.builtin.b64decode }}
+
+
+- name: "Molecule | Verify | Assert custom action contains expected directives"
+  ansible.builtin.assert:
+    that:
+      - "'[Definition]' in __testing_custom_action_decoded"
+      - "'actionban' in __testing_custom_action_decoded"
+      - "'actionunban' in __testing_custom_action_decoded"
+      - "'curl' in __testing_custom_action_decoded"
+    fail_msg: >-
+      The custom action config file is missing expected directives.
+      Actual content: {{ __testing_custom_action_decoded }}
+    success_msg: >-
+      The custom action config file contains all expected directives.
 
 
 ## Service state
@@ -150,4 +274,51 @@
 
 ## Configuration
 
-# FIXME
+- name: "Molecule | Verify | Read service drop-in config file content"
+  ansible.builtin.slurp:
+    src: "{{ __run_fail2ban_config_service_dropin_file_path }}"
+  register: __testing_service_dropin_content
+
+
+- name: "Molecule | Verify | Set service drop-in config file content as fact"
+  ansible.builtin.set_fact:
+    __testing_service_dropin_decoded: >-
+      {{ __testing_service_dropin_content['content'] | ansible.builtin.b64decode }}
+
+
+- name: "Molecule | Verify | Assert service drop-in contains expected directives"
+  ansible.builtin.assert:
+    that:
+      - "'[DEFAULT]' in __testing_service_dropin_decoded"
+      - "'loglevel = INFO' in __testing_service_dropin_decoded"
+      - "'logtarget = /var/log/fail2ban.log' in __testing_service_dropin_decoded"
+      - "'[Thread]' in __testing_service_dropin_decoded"
+      - "'stacksize = 0' in __testing_service_dropin_decoded"
+    fail_msg: >-
+      The service drop-in config file is missing expected directives.
+      Actual content: {{ __testing_service_dropin_decoded }}
+    success_msg: >-
+      The service drop-in config file contains all expected directives.
+
+
+- name: "Molecule | Verify | Validate overall fail2ban configuration"
+  ansible.builtin.command:
+    argv:
+      - "{{ __run_fail2ban_client_exec_path }}"
+      - "-d"
+  register: __testing_fail2ban_config_validation
+  changed_when:
+    - false
+  failed_when:
+    - __testing_fail2ban_config_validation is ansible.builtin.failed
+
+
+- name: "Molecule | Verify | Assert fail2ban configuration is valid"
+  ansible.builtin.assert:
+    that:
+      - __testing_fail2ban_config_validation is ansible.builtin.success
+    fail_msg: >-
+      The fail2ban configuration is invalid.
+      Output: {{ __testing_fail2ban_config_validation['stderr'] | default('') }}
+    success_msg: >-
+      The fail2ban configuration is valid.

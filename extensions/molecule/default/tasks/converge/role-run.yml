@@ -1,6 +1,6 @@
 # Execute the collection role "run" against all driver-created instances.
 
-- name: "Molecule | Converge | Store run_fail2ban* role parameters in __testing_state"
+- name: "Molecule | Converge | Store run_fail2ban_* role parameters in __testing_state"
   ansible.builtin.include_tasks:
     file: "../tasks/state_update.yml"
   vars:
@@ -28,12 +28,12 @@
           logencoding: "utf-8"
           destemail: "root123@localhost"
           sender: "root123@<fq-hostname>" # <fq-hostname> placeholder provided by Fail2ban
-          # FIXME hier spielt die music! Hier brauche ich noch rollenmagic
-          backend: "auto" # FIXME this is a Fail2ban thing, I want an own mechanism
+          backend: "auto"
           banaction: "iptables-multiport"
           banaction_allports: "iptables-allports"
         sshd:
           enabled: true
+          backend: "systemd"
       run_fail2ban_config_jail_dropin_file_name: "99-custom-dropin-jail.local"
 
       run_fail2ban_custom_filters:
@@ -51,15 +51,15 @@
           content: |
             [Definition]
             actionban = curl -X POST -H 'Content-type: application/json' --data '{"text":"Banned <ip>"}' ...
-            actionunban = curl -X POST -H 'Content
+            actionunban = curl -X POST -H 'Content-type: application/json' --data '{"text":"Unbanned <ip>"}' ...
 
 
-- name: "Molecule | Converge | Set run_fail2ban* role parameters as facts from __testing_state"
+- name: "Molecule | Converge | Set run_fail2ban_* parameters as facts from __testing_state"
   ansible.builtin.set_fact:
     "{{ item['key'] }}": "{{ item['value'] }}"
   loop: >-
     {{
-      __testing_state
+      (__testing_state | default({}, true))
       | ansible.builtin.dict2items
       | ansible.builtin.selectattr('key', 'match', '^run_fail2ban_')
       | ansible.builtin.list
