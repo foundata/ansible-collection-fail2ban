@@ -261,8 +261,7 @@ argument_specs:
               before: "common.conf"
             Definition:
               _daemon: "dropbear"
-              failregex: |
-
+              failregex: |-
                 ^[Ll]ogin attempt for nonexistent user ('.*' )?from <HOST>:\d+$
                 ^[Bb]ad (PAM )?password attempt for .+ from <HOST>(:\d+)?$
           ```

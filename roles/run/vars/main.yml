@@ -76,7 +76,7 @@ __run_fail2ban_packages_install:
 # software. This is usually the case if there are common dependencies like
 # "curl" or "openssl" which typically should remain installed even after
 # uninstalling the software managed by this role.
-__run_fail2ban_packages_uninstall: "{{ run_fail2ban_packages_install }}"
+__run_fail2ban_packages_uninstall: "{{ __run_fail2ban_packages_install }}"
 
 
 # List of package names to be removed unconditionally before installation
@@ -91,10 +91,9 @@ __run_fail2ban_packages_removal: []
 __run_fail2ban_paths_removal: []
 
 
-# Configuration file paths, ownership, and permissions for the Postfix daemon.
-# These variables define the different locations of configuration files, the
-# include directory, and the Ansible-managed configuration file, ensuring
-# consistent file handling across distributions.
+# Configuration file paths, ownership, and permissions. These variables define
+# the different locations of configuration files, include directories, and
+# Ansible-managed files, ensuring consistent file handling across distributions.
 __run_fail2ban_config_service_file_path: "/etc/fail2ban/fail2ban.conf"
 __run_fail2ban_config_service_file_owner: "root"
 __run_fail2ban_config_service_file_group: "root"
@@ -141,9 +140,7 @@ __run_fail2ban_config_action_dropin_file_group: "root"
 __run_fail2ban_config_action_dropin_file_mode: "u=rw,g=r,o=r" # 0644
 
 
-# Fail2ban daemon service name and executable paths.
-# These variables define the systemd service name for SSH daemon
-# and the paths to the fail2ban executables for service management and validation.
+# Daemon service name and paths of executables for management and validation.
 __run_fail2ban_fail2ban_servicename: "fail2ban.service"
 __run_fail2ban_server_exec_path: "/usr/bin/fail2ban-server"
 __run_fail2ban_client_exec_path: "/usr/bin/fail2ban-client"
