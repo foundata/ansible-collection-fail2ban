@@ -1,0 +1,24 @@
+# Internal role variables specific to: RedHat (os_family or distribution)
+#
+# Only values specific to the platform and its functionality should be included
+# here. Variables in this file override those defined in vars/main.yml.
+
+---
+
+__run_fail2ban_jail_settings_overwrite:
+  DEFAULT:
+    # firewalld is the default firewall service on Red Hat-like systems (and
+    # enabled by default). The ban actions are set to use firewalld's rich rules
+    # interface accordingly.
+    banaction: "firewallcmd-rich-rules"
+    banaction_allports: "firewallcmd-rich-rules"
+
+
+__run_fail2ban_packages_install_map_backends:
+  pyinotify:
+    - "python3-inotify" # Python bindings for the inotify mechanism wrapper
+  # systemd:
+  #   The "fail2ban-systemd" package only sets systemd as the default backend.
+  #   We handle this instead via `__run_fail2ban_jail_settings_defaults`, which
+  #   is more explicit and manageable via role variables
+  #   - "fail2ban-systemd"

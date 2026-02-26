@@ -24,7 +24,7 @@
     mode: "{{ __run_fail2ban_config_service_dropin_file_mode }}"
   vars:
     # Pass (and/or adjust) variables needed for the template
-    tpl_settings: "{{ run_fail2ban_service_settings }}"
+    tpl_settings: "{{ __run_fail2ban_effective_service_settings }}"
   notify:
     - "run_fail2ban: restart fail2ban.service"
 
@@ -60,7 +60,7 @@
     mode: "{{ __run_fail2ban_config_jail_dropin_file_mode }}"
   vars:
     # Pass (and/or adjust) variables needed for the template
-    tpl_settings: "{{ run_fail2ban_jail_settings }}"
+    tpl_settings: "{{ __run_fail2ban_effective_jail_settings }}"
   notify:
     - "run_fail2ban: restart fail2ban.service"
 

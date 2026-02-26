@@ -1,0 +1,36 @@
+# Configuration: Tasks specific to: RedHat (os_family)
+#
+# Only tasks specific to the platform and its functionality should be included
+# here. Tasks in this file will be executed before those defined in
+# config/default.yml.
+
+---
+
+- name: "Config | Red Hat | Gather service facts"
+  ansible.builtin.service_facts:
+
+
+- name: "Config | Red Hat | Warn about banaction mismatch with active firewalld"
+  ansible.builtin.debug:
+    msg: >-
+      The firewalld service is active but the configured banaction
+      ('{{ __run_fail2ban_effective_jail_settings['DEFAULT']['banaction'] | ansible.builtin.default('') }}')
+      or banaction_allports
+      ('{{ __run_fail2ban_effective_jail_settings['DEFAULT']['banaction_allports'] | ansible.builtin.default('') }}')
+      does not start with 'firewallcmd'. Consider using firewalld-based ban actions
+      (e.g. 'firewallcmd-rich-rules', 'firewallcmd-allports') to avoid mixing firewall
+      rule ownership.
+  when:
+    - ansible_facts['services']['ufw.service'] is ansible.builtin.defined
+    - ansible_facts['services']['ufw.service']['state'] is ansible.builtin.defined
+    - ansible_facts['services']['ufw.service']['state'] == 'running'
+    - >-
+      (
+        (__run_fail2ban_effective_jail_settings['DEFAULT']['banaction'] | ansible.builtin.default(''))
+        is not ansible.builtin.match('^firewallcmd.*')
+      )
+      or
+      (
+        (__run_fail2ban_effective_jail_settings['DEFAULT']['banaction_allports'] | ansible.builtin.default(''))
+        is not ansible.builtin.match('^firewallcmd.*')
+      )

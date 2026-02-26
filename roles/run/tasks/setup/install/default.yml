@@ -20,6 +20,27 @@
     - (__run_fail2ban_packages_install | ansible.builtin.length) > 0
 
 
+- name: "Setup | Install | Default | Show detected backends requiring additional packages"
+  ansible.builtin.debug:
+    var: __run_fail2ban_detected_backends
+    verbosity: 4
+
+
+- name: "Setup | Install | Default | Install backend-specific packages"
+  ansible.builtin.package:
+    name: "{{ __run_fail2ban_packages_install_map_backends[item] }}"
+    state: "{{ 'latest' if (run_fail2ban_autoupgrade | ansible.builtin.bool) else 'present' }}"
+  loop: >-
+    {{
+      __run_fail2ban_detected_backends
+      | ansible.builtin.default([])
+      | ansible.builtin.select('in', __run_fail2ban_packages_install_map_backends.keys() | list)
+      | ansible.builtin.list
+    }}
+  when:
+    - (__run_fail2ban_detected_backends | ansible.builtin.default([]) | ansible.builtin.length) > 0
+
+
 - name: "Setup | Install | Default | Remove unwanted files and directories (e.g., to prevent conflicts or resolve incompatibilities)"
   ansible.builtin.file:
     path: "{{ item }}"

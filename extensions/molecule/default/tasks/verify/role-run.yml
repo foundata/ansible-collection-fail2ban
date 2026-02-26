@@ -139,18 +139,16 @@
 - name: "Molecule | Verify | Assert jail drop-in contains expected directives"
   ansible.builtin.assert:
     that:
+      # DEFAULT section with user-provided settings
       - "'[DEFAULT]' in __testing_jail_dropin_decoded"
       - "'bantime = 15m' in __testing_jail_dropin_decoded"
       - "'maxretry = 3' in __testing_jail_dropin_decoded"
       - "'enabled = false' in __testing_jail_dropin_decoded"
       - "'destemail = root123@localhost' in __testing_jail_dropin_decoded"
-      - "'ignoreself = true' in __testing_jail_dropin_decoded"
-      - "'usedns = false' in __testing_jail_dropin_decoded"
-      - "'logencoding = utf-8' in __testing_jail_dropin_decoded"
-      - "'backend = auto' in __testing_jail_dropin_decoded"
-      - "'banaction = iptables-multiport' in __testing_jail_dropin_decoded"
-      - "'banaction_allports = iptables-allports' in __testing_jail_dropin_decoded"
       - "'findtime = 10m' in __testing_jail_dropin_decoded"
+      # sshd section from jail default with user override
+      - "'[sshd]' in __testing_jail_dropin_decoded"
+      - "'maxretry = 19' in __testing_jail_dropin_decoded"
     fail_msg: >-
       The jail drop-in config file is missing expected directives.
       Actual content: {{ __testing_jail_dropin_decoded }}
@@ -268,7 +266,7 @@
   ansible.builtin.assert:
     that:
       - ansible_facts['services'][__run_fail2ban_fail2ban_servicename] is ansible.builtin.defined
-      - ansible_facts['services'][__run_fail2ban_fail2ban_servicename].state == 'running'
+      - ansible_facts['services'][__run_fail2ban_fail2ban_servicename]['state'] == 'running'
     fail_msg: "Fail2ban service '{{ __run_fail2ban_fail2ban_servicename }}' is not running"
     success_msg: "Fail2ban service '{{ __run_fail2ban_fail2ban_servicename }}' is running"
 
@@ -322,3 +320,36 @@
       Output: {{ __testing_fail2ban_config_validation['stderr'] | default('') }}
     success_msg: >-
       The fail2ban configuration is valid.
+
+
+## Backend package installation mapping
+
+- name: "Molecule | Verify | Check backend package installation mapping"
+  when:
+    - (ansible_facts['os_family'] | ansible.builtin.lower) == 'redhat'
+  block:
+
+    - name: "Install dependencies needed for package_facts on Fedora"
+      ansible.builtin.package:
+        name:
+          - "python3-rpm"
+          - "python3-libdnf5"
+        state: "present"
+      when:
+        - (ansible_facts['distribution'] | ansible.builtin.lower) == 'fedora'
+
+
+    - name: "Molecule | Verify | Gather package facts"
+      ansible.builtin.package_facts:
+        manager: "auto"
+
+
+    - name: "Molecule | Verify | Assert backend-specific package is installed on Red Hat platforms"
+      ansible.builtin.assert:
+        that:
+          - "'python3-inotify' in ansible_facts['packages']"
+        fail_msg: >-
+          The backend-specific package 'python3-inotify' is not installed even though the
+          'pyinotify' backend is configured for the dropbear jail.
+        success_msg: >-
+          The backend-specific package 'python3-inotify' is installed as expected.

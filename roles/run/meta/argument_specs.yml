@@ -64,9 +64,13 @@ argument_specs:
 
       run_fail2ban_service_settings:
         description: |
-          Fail2ban service configuration values for the drop-in configuration file
-          placed in `<config dir>/fail2ban.d` to override or extend your platform's
-          default config.
+          Fail2ban service configuration values.
+
+          These settings are placed in a drop-in configuration file in
+          `<config dir>/fail2ban.d`. They take highest priority, overriding internal
+          defaults (see `__run_fail2ban_service_settings_defaults` in `vars/main.yml`)
+          and platform-specific overrides.
+
 
           Use standard Fail2ban section names as top-level YAML keys, and place their
           corresponding option names and values inside each section. This YAML structure
@@ -119,9 +123,10 @@ argument_specs:
 
           The unmodified default configuration is already a good starting point and
           usually doesn't require changes when using common services like SSH or NGINX.
-          If empty dict (default), no custom service configuration is managed.
+          If empty dict (default), only the internal defaults and any platform-specific
+          overrides apply.
         type: "dict"
-        default: {}
+        default: {} # see __run_fail2ban_service_settings_defaults in vars/main.yml for the defaults
 
       run_fail2ban_config_service_dropin_file_name:
         description: |
@@ -139,8 +144,12 @@ argument_specs:
 
       run_fail2ban_jail_settings:
         description: |
-          Fail2ban jail configuration values for the drop-in configuration file placed
-          in `<config dir>/jail.d` to override or extend your platform's default config.
+          Fail2ban jail configuration values.
+
+          These settings are placed in a drop-in configuration file in
+          `<config dir>/jail.d`. They take highest priority, overriding internal
+          defaults (see `__run_fail2ban_jail_settings_defaults` in `vars/main.yml`) and
+          platform-specific overrides.
 
           Use standard Fail2ban section names as top-level YAML keys, and place their
           corresponding option names and values inside each section. This YAML structure
@@ -205,11 +214,11 @@ argument_specs:
           - https://github.com/fail2ban/fail2ban/wiki/Best-practice
 
           The unmodified default configuration is already a good starting point and
-          usually doesn't require changes when using common  services like SSH or NGINX
-          (beside enabling the jail). If empty dict (default), no custom jail
-          configuration is managed.
+          usually doesn't require changes when using common services like SSH or NGINX
+          (beside enabling the jail). If empty dict (default), only the internal
+          defaults, and platform overrides apply.
         type: "dict"
-        default: {}
+        default: {} # see __run_fail2ban_jail_settings_defaults in vars/main.yml for the defaults
 
       run_fail2ban_config_jail_dropin_file_name:
         description: |
@@ -262,8 +271,8 @@ argument_specs:
             Definition:
               _daemon: "dropbear"
               failregex: |-
-                ^[Ll]ogin attempt for nonexistent user ('.*' )?from <HOST>:\d+$
-                ^[Bb]ad (PAM )?password attempt for .+ from <HOST>(:\d+)?$
+                ^[Ll]ogin attempt for nonexistent user ('.*' )?from <HOST>:\\d+$
+                ^[Bb]ad (PAM )?password attempt for .+ from <HOST>(:\\d+)?$
           ```
 
           will create `filter.d/dropbear-complex.local` with the content:
@@ -274,8 +283,8 @@ argument_specs:
 
           [Definition]
           _daemon = dropbear
-          failregex = ^[Ll]ogin attempt for nonexistent user ('.*' )?from <HOST>:\d+$
-                      ^[Bb]ad (PAM )?password attempt for .+ from <HOST>(:\d+)?$
+          failregex = ^[Ll]ogin attempt for nonexistent user ('.*' )?from <HOST>:\\d+$
+                      ^[Bb]ad (PAM )?password attempt for .+ from <HOST>(:\\d+)?$
           ```
 
           The official documentation provides general configuration guidance:

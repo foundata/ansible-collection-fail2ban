@@ -39,6 +39,17 @@ run_fail2ban_autoupgrade: false
 # status applies to all services if multiple are being managed by this role.
 run_fail2ban_service_state: "enabled"
 
+# Dict. Additional configuration for the Fail2ban service (additional config
+# values or to overwrite defaults from `__run_fail2ban_service_settings_defaults`
+# in `vars/main.yml`).
+#
+# Use standard Fail2ban section names as top-level YAML keys, and place their
+# corresponding option names and values inside each section. This YAML structure
+# is directly translated into Fail2ban's INI format. See `argument_specs.yml`
+# or README for full details and examples.
+#
+# If empty dict (default), only the internal defaults and any platform-specific
+# overrides apply.
 run_fail2ban_service_settings: {}
 
 run_fail2ban_config_service_dropin_file_name: "99-managed.local"

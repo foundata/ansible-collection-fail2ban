@@ -154,6 +154,69 @@ __run_fail2ban_chmod_exec_path: "/usr/bin/chmod"
 __run_fail2ban_chown_exec_path: "/usr/bin/chown"
 
 
+# Additional default configuration Fail2ban service configuration.
+#
+# See run_fail2ban_service_settings in defaults/main.yml for a detailled
+# description of the structure (as this variable is using the same).
+__run_fail2ban_service_settings_defaults: {}
+
+
+# Platform-specific overrides for service settings. Overridden by platform
+# vars files (e.g., vars/debian.yml). Gets merged on top of the defaults
+# before user settings are applied.
+__run_fail2ban_service_settings_overwrite: {}
+
+
+# Internal default settings for jail configuration (jail.d drop-in). These
+# provide sensible defaults for the critical platform-dependent knobs. Platform
+# vars files override specific keys via __run_fail2ban_jail_settings_overwrite.
+__run_fail2ban_jail_settings_defaults:
+  DEFAULT:
+    # Ignore LAN IP addresses and the host itself
+    ignoreself: true
+    ignoreip: "127.0.0.1/8 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16 ::1/128 fc00::/7 fe80::/10"
+    # Modern Linux uses systemd journal as primary log source. The "systemd"
+    # backend lets fail2ban read directly from journald instead of relying on
+    # log files.
+    backend: "systemd"
+    # Preventing encoding test (logencoding = "auto") safes some CPU cycles and
+    # should be no problem with systemd logs / modern software (and: can still
+    # be overwritten per-jail as needed)
+    logencoding: "utf-8"
+    # Modern Linux uses nftables as the native firewall engine (and iptables
+    # often runs in nf_tables compatibility mode). "multiport" keeps bans
+    # scoped to the jail's configured ports, which is a conservative default
+    # that reduces collateral impact; jails that set port=all will automatically
+    # use banaction_allports for a full host-level block.
+    # Users / platforms that manage the firewall via a higher-level tool should
+    # override these actions to not mix firewall rule ownership (e.g. if
+    # firewalld (firewallcmd-*), ufw (ufw), or legacy iptables manages the
+    # firewall.
+    # Hint to list available actions: ls -l /etc/fail2ban/action.d/
+    banaction: "nftables[type=multiport]" # "multiport" is usually default for nftables, but let's be explicit here
+    banaction_allports: "nftables[type=allports]" # Note: Actions like "nftables-allports" are legacy syntax
+  sshd:
+    enabled: true
+    port: "ssh"
+    filter: "sshd"
+    maxretry: 5
+
+
+# Platform-specific overrides for jail settings. Overridden by platform vars
+# files (e.g., vars/debian.yml, vars/redhat.yml). Gets merged on top of the
+# defaults before managed jails and user settings are applied.
+__run_fail2ban_jail_settings_overwrite: {}
+
+
+# Mapping of log backend names to additional packages that need to be
+# installed. Backends not listed here do not require extra packages.
+# This is highly platform-specific specific, so the variable gets propably
+# overwritten by platform vars files (e.g., vars/debian.yml, vars/redhat.yml).
+# Please note that the "polling" backend (usually used as slow fallback) does
+# not need any extra packages at all.
+__run_fail2ban_packages_install_map_backends: {}
+
+
 ### Override defaults of dependencies used by this role (if any).
 
 # nothing right now

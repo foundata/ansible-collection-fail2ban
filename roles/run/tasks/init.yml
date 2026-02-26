@@ -125,3 +125,57 @@
   when:
     - __run_fail2ban_vars_file is ansible.builtin.file
   loop: "{{ __run_fail2ban_platform_filenames_most_specific_last }}"
+
+
+### fail2ban specific
+
+
+- name: "Init | Merge service settings (defaults, platform overrides, user)"
+  ansible.builtin.set_fact:
+    __run_fail2ban_effective_service_settings: >-
+      {{
+        __run_fail2ban_service_settings_defaults
+        | ansible.builtin.combine(__run_fail2ban_service_settings_overwrite, recursive=true)
+        | ansible.builtin.combine(run_fail2ban_service_settings, recursive=true)
+      }}
+
+
+- name: "Init | Merge jail settings (defaults, platform overrides, managed jails, user)"
+  ansible.builtin.set_fact:
+    __run_fail2ban_effective_jail_settings: >-
+      {{
+        __run_fail2ban_jail_settings_defaults
+        | ansible.builtin.combine(__run_fail2ban_jail_settings_overwrite, recursive=true)
+        | ansible.builtin.combine(run_fail2ban_jail_settings, recursive=true)
+      }}
+
+
+- name: "Init | Show effective service settings"
+  ansible.builtin.debug:
+    var: __run_fail2ban_effective_service_settings
+    verbosity: 3
+
+
+- name: "Init | Show effective jail settings"
+  ansible.builtin.debug:
+    var: __run_fail2ban_effective_jail_settings
+    verbosity: 3
+
+
+- name: "Init | Detect log backends used in effective jail settings"
+  ansible.builtin.set_fact:
+    __run_fail2ban_detected_backends: >-
+      {{
+        __run_fail2ban_effective_jail_settings.values()
+        | ansible.builtin.select('mapping')
+        | ansible.builtin.selectattr('backend', 'defined')
+        | ansible.builtin.map(attribute='backend')
+        | ansible.builtin.list
+        | ansible.builtin.unique
+      }}
+
+
+- name: "Init | Show detected log backends"
+  ansible.builtin.debug:
+    var: __run_fail2ban_detected_backends
+    verbosity: 3

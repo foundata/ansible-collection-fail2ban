@@ -11,7 +11,6 @@
         DEFAULT:
           loglevel: "INFO"
           logtarget: "/var/log/fail2ban.log"
-          ignoreip: "127.0.0.1/8 ::1 192.168.0.0/16 10.0.0.0/8 my-trusted-host.example.com"
         Thread:
           stacksize: 0
       run_fail2ban_config_service_dropin_file_name: "99-custom-dropin-service.local"
@@ -20,20 +19,16 @@
         DEFAULT:
           enabled: false
           maxretry: 3
-          ignoreself: true
           ignoreip: "127.0.0.1/8 ::1 192.168.0.0/16 10.0.0.0/8 my-trusted-host.example.com"
           bantime: "15m"
           findtime: "10m"
           usedns: false
-          logencoding: "utf-8"
           destemail: "root123@localhost"
           sender: "root123@<fq-hostname>" # <fq-hostname> placeholder provided by Fail2ban
-          backend: "auto"
-          banaction: "iptables-multiport"
-          banaction_allports: "iptables-allports"
         sshd:
-          enabled: true
-          backend: "systemd"
+          maxretry: 19 # override jail default to verify user settings take priority
+        dropbear:
+          backend: "pyinotify" # to trigger backend mapping package install
       run_fail2ban_config_jail_dropin_file_name: "99-custom-dropin-jail.local"
 
       run_fail2ban_custom_filters:
