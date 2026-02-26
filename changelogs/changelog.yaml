@@ -1,0 +1,14 @@
+---
+ancestor: null
+releases:
+  1.0.0:
+    changes:
+      release_summary: 'Release Date: 2026-02-27
+
+
+        First public release, providing all functionality and files.
+
+        '
+    fragments:
+      - 1.0.0-release.yaml
+    release_date: '2026-02-27'
