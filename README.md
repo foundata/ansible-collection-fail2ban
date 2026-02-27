@@ -1,6 +1,6 @@
 # Ansible collection: `foundata.fail2ban`
 
-This repository contains the `foundata.fail2ban` Ansible Collection.
+This repository contains the `foundata.fail2ban` Ansible Collection. It provides resources to manage [fail2ban](https://github.com/fail2ban/fail2ban), a daemon to ban hosts that cause multiple authentication errors.
 
 
 <div align="center" id="project-readme-header">

@@ -1,6 +1,6 @@
 # Ansible role: `foundata.fail2ban.run`
 
-The `foundata.fail2ban.run` Ansible role (part of the `foundata.fail2ban` Ansible collection).
+The `foundata.fail2ban.run` Ansible role (part of the `foundata.fail2ban` Ansible collection). It provides automated management of [fail2ban](https://github.com/fail2ban/fail2ban) configuration and service state.
 
 
 
