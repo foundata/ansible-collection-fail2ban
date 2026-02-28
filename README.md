@@ -28,7 +28,7 @@ This repository contains the `foundata.fail2ban` Ansible Collection. It provides
 
 ### Role: `foundata.fail2ban.run`
 
-See the [role's `README.md`](./roles/run/README.md) for more information and usage examples.
+The primary resource in this collection to configure and maintain Fail2Ban, including jail configuration, filters, actions, and related settings. See the [role's `README.md`](./roles/run/README.md) for more information and usage examples.
 
 
 
