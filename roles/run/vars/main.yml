@@ -126,18 +126,18 @@ __run_fail2ban_config_filter_dropin_dir_owner: "{{ __run_fail2ban_config_service
 __run_fail2ban_config_filter_dropin_dir_group: "{{ __run_fail2ban_config_service_file_group }}"
 __run_fail2ban_config_filter_dropin_dir_mode: "{{ __run_fail2ban_config_service_dropin_dir_mode }}"
 
-__run_fail2ban_config_filter_dropin_file_owner: "root"
-__run_fail2ban_config_filter_dropin_file_group: "root"
-__run_fail2ban_config_filter_dropin_file_mode: "u=rw,g=r,o=r" # 0644
+__run_fail2ban_config_filter_dropin_file_owner: "{{ __run_fail2ban_config_service_file_owner }}"
+__run_fail2ban_config_filter_dropin_file_group: "{{ __run_fail2ban_config_service_file_group }}"
+__run_fail2ban_config_filter_dropin_file_mode: "{{ __run_fail2ban_config_service_file_mode }}"
 
 __run_fail2ban_config_action_dropin_dir_path: "/etc/fail2ban/action.d"
 __run_fail2ban_config_action_dropin_dir_owner: "{{ __run_fail2ban_config_service_file_owner }}"
 __run_fail2ban_config_action_dropin_dir_group: "{{ __run_fail2ban_config_service_file_group }}"
 __run_fail2ban_config_action_dropin_dir_mode: "{{ __run_fail2ban_config_service_dropin_dir_mode }}"
 
-__run_fail2ban_config_action_dropin_file_owner: "root"
-__run_fail2ban_config_action_dropin_file_group: "root"
-__run_fail2ban_config_action_dropin_file_mode: "u=rw,g=r,o=r" # 0644
+__run_fail2ban_config_action_dropin_file_owner: "{{ __run_fail2ban_config_service_file_owner }}"
+__run_fail2ban_config_action_dropin_file_group: "{{ __run_fail2ban_config_service_file_group }}"
+__run_fail2ban_config_action_dropin_file_mode: "{{ __run_fail2ban_config_service_file_mode }}"
 
 
 # Daemon service name and paths of executables for management and validation.
