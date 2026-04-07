@@ -20,12 +20,6 @@
     - (__run_fail2ban_packages_install | ansible.builtin.length) > 0
 
 
-- name: "Setup | Install | Default | Show detected backends requiring additional packages"
-  ansible.builtin.debug:
-    var: __run_fail2ban_detected_backends
-    verbosity: 4
-
-
 - name: "Setup | Install | Default | Install backend-specific packages"
   ansible.builtin.package:
     name: "{{ __run_fail2ban_packages_install_map_backends[item] }}"
