@@ -8,14 +8,14 @@
 
 ## Preparation
 
-- name: "Molecule | Verify | Set run_fail2ban_* parameters as facts from __testing_state"
+- name: "Molecule | Verify | Set run_fail2ban_* and __testing_* variables as facts from __testing_state"
   ansible.builtin.set_fact:
     "{{ item['key'] }}": "{{ item['value'] }}"
   loop: >-
     {{
       (__testing_state | default({}, true))
       | ansible.builtin.dict2items
-      | ansible.builtin.selectattr('key', 'match', '^run_fail2ban_')
+      | ansible.builtin.selectattr('key', 'match', '^(run_fail2ban_|__testing_)')
       | ansible.builtin.list
     }}
 
@@ -38,7 +38,7 @@
       }}
 
 
-## Service drop-in file existence
+## Service drop-in file
 
 - name: "Molecule | Verify | Check if fail2ban service drop-in configuration file exists"
   ansible.builtin.stat:
@@ -80,7 +80,7 @@
     - __run_fail2ban_config_service_dropin_file_path != __run_fail2ban_config_service_dropin_file_path_default
 
 
-## Jail drop-in file existence
+## Jail drop-in file
 
 - name: "Molecule | Verify | Check if fail2ban jail drop-in configuration file exists"
   ansible.builtin.stat:
@@ -122,8 +122,6 @@
     - __run_fail2ban_config_jail_dropin_file_path != __run_fail2ban_config_jail_dropin_file_path_default
 
 
-## Jail drop-in file contents
-
 - name: "Molecule | Verify | Read jail drop-in config file content"
   ansible.builtin.slurp:
     src: "{{ __run_fail2ban_config_jail_dropin_file_path }}"
@@ -156,7 +154,7 @@
       The jail drop-in config file contains all expected directives.
 
 
-## Custom filter file(s) existence
+## Custom filter file(s)
 
 - name: "Molecule | Verify | Check if custom filter config file exists"
   ansible.builtin.stat:
@@ -173,8 +171,6 @@
     success_msg: >-
       The custom filter config file '{{ __testing_custom_filter_file_path }}' exists.
 
-
-## Custom filter file(s) contents
 
 - name: "Molecule | Verify | Read custom filter config file content"
   ansible.builtin.slurp:
@@ -204,7 +200,7 @@
       The custom filter config file contains all expected directives.
 
 
-## Custom action file(s) existence
+## Custom action file(s)
 
 - name: "Molecule | Verify | Check if custom action config file exists"
   ansible.builtin.stat:
@@ -221,8 +217,6 @@
     success_msg: >-
       The custom action config file '{{ __testing_custom_action_file_path }}' exists.
 
-
-## Custom action file(s) contents
 
 - name: "Molecule | Verify | Read custom action config file content"
   ansible.builtin.slurp:
@@ -270,7 +264,8 @@
     fail_msg: "Fail2ban service '{{ __run_fail2ban_fail2ban_servicename }}' is not running"
     success_msg: "Fail2ban service '{{ __run_fail2ban_fail2ban_servicename }}' is running"
 
-## Configuration
+
+## Main configuration
 
 - name: "Molecule | Verify | Read service drop-in config file content"
   ansible.builtin.slurp:
