@@ -130,25 +130,14 @@
 ### fail2ban specific
 
 
-# __run_fail2ban_effective_service_settings is computed lazily in vars/main.yml
-# (defaults, platform overrides, then user settings).
-- name: "Init | Show effective service settings"
+- name: "Init | Show effective merged variables (computed lazily in vars/main.yml)"
   ansible.builtin.debug:
-    var: __run_fail2ban_effective_service_settings
+    msg: "{{ __run_fail2ban_effective_var }} = {{ lookup('ansible.builtin.vars', __run_fail2ban_effective_var) }}"
     verbosity: 3
-
-
-# __run_fail2ban_effective_jail_settings is computed lazily in vars/main.yml
-# (defaults, platform overrides, then user settings).
-- name: "Init | Show effective jail settings"
-  ansible.builtin.debug:
-    var: __run_fail2ban_effective_jail_settings
-    verbosity: 3
-
-
-# __run_fail2ban_detected_backends is computed lazily in vars/main.yml, derived
-# from the (also lazy) __run_fail2ban_effective_jail_settings.
-- name: "Init | Show detected log backends"
-  ansible.builtin.debug:
-    var: __run_fail2ban_detected_backends
-    verbosity: 3
+  loop:
+    - "__run_fail2ban_effective_service_settings"
+    - "__run_fail2ban_effective_jail_settings"
+    - "__run_fail2ban_detected_backends"
+  loop_control:
+    loop_var: "__run_fail2ban_effective_var"
+    label: "{{ __run_fail2ban_effective_var }}"
