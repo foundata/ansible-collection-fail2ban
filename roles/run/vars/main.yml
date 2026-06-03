@@ -176,6 +176,18 @@ __run_fail2ban_service_settings_defaults: {}
 # before user settings are applied.
 __run_fail2ban_service_settings_overwrite: {}
 
+# Effective Fail2ban service settings: defaults, then platform overrides, then
+# the user-supplied run_fail2ban_service_settings (highest priority), deep-merged.
+#
+# Lazy / late-bound evaluation: Jinja renders this variable on access,
+# after tasks/init.yml loads the platform vars file that sets the inputs.
+__run_fail2ban_effective_service_settings: >-
+  {{
+    __run_fail2ban_service_settings_defaults
+    | ansible.builtin.combine(__run_fail2ban_service_settings_overwrite, recursive=true)
+    | ansible.builtin.combine(run_fail2ban_service_settings, recursive=true)
+  }}
+
 
 # Internal default settings for jail configuration (jail.d drop-in). These
 # provide sensible defaults for the critical platform-dependent knobs. Platform
@@ -216,6 +228,35 @@ __run_fail2ban_jail_settings_defaults:
 # files (e.g., vars/debian.yml, vars/redhat.yml). Gets merged on top of the
 # defaults before managed jails and user settings are applied.
 __run_fail2ban_jail_settings_overwrite: {}
+
+# Effective Fail2ban jail settings: defaults, then platform overrides, then the
+# user-supplied run_fail2ban_jail_settings (highest priority), deep-merged.
+#
+# Lazy / late-bound evaluation: Jinja renders this variable on access,
+# after tasks/init.yml loads the platform vars file that sets the inputs.
+__run_fail2ban_effective_jail_settings: >-
+  {{
+    __run_fail2ban_jail_settings_defaults
+    | ansible.builtin.combine(__run_fail2ban_jail_settings_overwrite, recursive=true)
+    | ansible.builtin.combine(run_fail2ban_jail_settings, recursive=true)
+  }}
+
+# Distinct log backends referenced by the effective jail settings. Derived from
+# the merged jail settings above and consumed at runtime to decide which extra
+# backend packages to install (see tasks/setup/install). It never drives a
+# file include, so lazy evaluation is safe.
+#
+# Lazy / late-bound evaluation: Jinja renders this variable on access,
+# after tasks/init.yml loads the platform vars file that sets the inputs.
+__run_fail2ban_detected_backends: >-
+  {{
+    __run_fail2ban_effective_jail_settings.values()
+    | ansible.builtin.select('mapping')
+    | ansible.builtin.selectattr('backend', 'defined')
+    | ansible.builtin.map(attribute='backend')
+    | ansible.builtin.list
+    | ansible.builtin.unique
+  }}
 
 
 # Mapping of log backend names to additional packages that need to be

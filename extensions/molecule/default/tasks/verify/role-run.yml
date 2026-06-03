@@ -348,3 +348,70 @@
           'pyinotify' backend is configured for the dropbear jail.
         success_msg: >-
           The backend-specific package 'python3-inotify' is installed as expected.
+
+
+## Init-only merged variable evaluation
+#
+# Re-run the role's init with controlled inputs and assert the merged variables
+# directly (whether materialized in tasks/init.yml or lazily in vars/main.yml):
+# the user settings must win, the defaults and the (RedHat-family) platform
+# override must survive, and the detected backends must reflect the merged jail
+# settings.
+#
+# Inputs are set via set_fact so they outrank the converge-time facts restored
+# at the top of this file and stay in scope when the assertions dereference the
+# (lazily evaluated) effective variables.
+
+- name: "Molecule | Verify | Validate effective merged variables (init-only)"
+  block:
+
+    - name: "Molecule | Verify | Set controlled inputs for the merge checks"
+      ansible.builtin.set_fact:
+        run_fail2ban_service_settings:
+          DEFAULT:
+            loglevel: "DEBUG"
+        run_fail2ban_jail_settings:
+          myjail:
+            enabled: true
+            backend: "polling"
+            port: "1234"
+
+    - name: "Molecule | Verify | Re-initialize fail2ban with controlled inputs"
+      ansible.builtin.include_role:
+        name: "foundata.fail2ban.run"
+        tasks_from: "init"
+        public: true
+
+
+    - name: "Molecule | Verify | Assert effective service settings merged correctly"
+      ansible.builtin.assert:
+        that:
+          - __run_fail2ban_effective_service_settings['DEFAULT']['loglevel'] == "DEBUG"
+        fail_msg: "__run_fail2ban_effective_service_settings did not merge the user service settings as expected."
+        success_msg: "__run_fail2ban_effective_service_settings merged the user service settings correctly."
+
+
+    - name: "Molecule | Verify | Assert effective jail settings merged correctly"
+      ansible.builtin.assert:
+        that:
+          # platform overwrite (RedHat family) wins over the default banaction
+          - __run_fail2ban_effective_jail_settings['DEFAULT']['banaction'] == "firewallcmd-rich-rules"
+          # an untouched default survives
+          - __run_fail2ban_effective_jail_settings['DEFAULT']['ignoreself'] | ansible.builtin.bool
+          # a default-managed jail survives
+          - __run_fail2ban_effective_jail_settings['sshd']['enabled'] | ansible.builtin.bool
+          # the user-supplied jail is added
+          - __run_fail2ban_effective_jail_settings['myjail']['port'] == "1234"
+        fail_msg: "__run_fail2ban_effective_jail_settings did not merge defaults, platform overrides and user settings as expected."
+        success_msg: "__run_fail2ban_effective_jail_settings merged defaults, platform overrides and user settings correctly."
+
+
+    - name: "Molecule | Verify | Assert detected backends reflect the merged jail settings"
+      ansible.builtin.assert:
+        that:
+          # DEFAULT.backend default
+          - "'systemd' in __run_fail2ban_detected_backends"
+          # user jail backend
+          - "'polling' in __run_fail2ban_detected_backends"
+        fail_msg: "__run_fail2ban_detected_backends did not reflect the merged jail settings."
+        success_msg: "__run_fail2ban_detected_backends correctly reflects the merged jail settings."

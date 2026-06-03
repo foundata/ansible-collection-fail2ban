@@ -1,0 +1,10 @@
+---
+trivial:
+  - >
+    ``run`` role - Internal refactor: the effective merged variables
+    ``__run_fail2ban_effective_service_settings``,
+    ``__run_fail2ban_effective_jail_settings`` and
+    ``__run_fail2ban_detected_backends`` are now computed lazily in
+    ``vars/main.yml`` instead of via ``set_fact`` tasks in ``tasks/init.yml``.
+    No user-facing behaviour change. Added Molecule init-only regression
+    tests asserting the merges and the detected backends.
