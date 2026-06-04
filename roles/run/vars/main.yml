@@ -166,7 +166,7 @@ __run_fail2ban_chown_exec_path: "/usr/bin/chown"
 
 # Additional default configuration Fail2ban service configuration.
 #
-# See run_fail2ban_service_settings in defaults/main.yml for a detailled
+# See run_fail2ban_service_settings in defaults/main.yml for a detailed
 # description of the structure (as this variable is using the same).
 __run_fail2ban_service_settings_defaults: {}
 
