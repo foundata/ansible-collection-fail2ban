@@ -394,16 +394,26 @@
     - name: "Molecule | Verify | Assert effective jail settings merged correctly"
       ansible.builtin.assert:
         that:
-          # platform overwrite (RedHat family) wins over the default banaction
-          - __run_fail2ban_effective_jail_settings['DEFAULT']['banaction'] == "firewallcmd-rich-rules"
           # an untouched default survives
           - __run_fail2ban_effective_jail_settings['DEFAULT']['ignoreself'] | ansible.builtin.bool
           # a default-managed jail survives
           - __run_fail2ban_effective_jail_settings['sshd']['enabled'] | ansible.builtin.bool
           # the user-supplied jail is added
           - __run_fail2ban_effective_jail_settings['myjail']['port'] == "1234"
-        fail_msg: "__run_fail2ban_effective_jail_settings did not merge defaults, platform overrides and user settings as expected."
-        success_msg: "__run_fail2ban_effective_jail_settings merged defaults, platform overrides and user settings correctly."
+        fail_msg: "__run_fail2ban_effective_jail_settings did not merge defaults and user settings as expected."
+        success_msg: "__run_fail2ban_effective_jail_settings merged defaults and user settings correctly."
+
+    - name: "Molecule | Verify | Assert RedHat-family platform overwrite is present in jail settings"
+      ansible.builtin.assert:
+        that:
+          # banaction is overridden only by the RedHat-family platform overwrite
+          # (vars/redhat.yml); other families keep the nftables default, so this
+          # check is gated to the RedHat family.
+          - __run_fail2ban_effective_jail_settings['DEFAULT']['banaction'] == "firewallcmd-rich-rules"
+        fail_msg: "__run_fail2ban_effective_jail_settings did not include the RedHat-family banaction overwrite."
+        success_msg: "__run_fail2ban_effective_jail_settings includes the RedHat-family banaction overwrite."
+      when:
+        - ansible_facts['os_family'] == "RedHat"
 
 
     - name: "Molecule | Verify | Assert detected backends reflect the merged jail settings"
