@@ -1,6 +1,6 @@
 version = 1
 SPDX-PackageName = "Ansible collection: foundata.fail2ban"
-SPDX-PackageDownloadLocation = "https://github.com/foundata/ansible-collection-fail2ban"
+SPDX-PackageDownloadLocation = "https://foundata.com/en/projects/ansible-collection-fail2ban/#releases"
 SPDX-PackageSupplier = "foundata GmbH"
 SPDX-PackageComment = """
 This project may include calls to Application Programming Interfaces
