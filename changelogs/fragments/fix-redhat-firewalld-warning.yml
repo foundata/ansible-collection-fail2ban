@@ -1,0 +1,8 @@
+---
+
+bugfixes:
+  - >
+    ``run`` role - The Red Hat banaction-mismatch warning checked
+    ``ufw.service`` (a copy-paste from the Ubuntu tasks) instead of
+    ``firewalld.service``, so on Red Hat-family systems it never fired for an
+    actually-active firewalld. It now checks ``firewalld.service``.
