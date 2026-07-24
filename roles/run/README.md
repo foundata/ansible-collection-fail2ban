@@ -155,6 +155,8 @@ There are also tags usually not meant to be called directly but listed for the s
 
 ## Role variables<a id="variables"></a>
 
+Main entry point for the foundata.fail2ban.run role
+
 The following variables can be configured for this role:
 
 | Variable | Type | Required | Default | Description (abstract) |
@@ -465,8 +467,8 @@ dropbear-complex:
   Definition:
     _daemon: "dropbear"
     failregex: |-
-      ^[Ll]ogin attempt for nonexistent user ('.*' )?from <HOST>:\d+$
-      ^[Bb]ad (PAM )?password attempt for .+ from <HOST>(:\d+)?$
+      ^[Ll]ogin attempt for nonexistent user ('.*' )?from <HOST>:\\d+$
+      ^[Bb]ad (PAM )?password attempt for .+ from <HOST>(:\\d+)?$
 ```
 
 will create `filter.d/dropbear-complex.local` with the content:
@@ -477,8 +479,8 @@ before = common.conf
 
 [Definition]
 _daemon = dropbear
-failregex = ^[Ll]ogin attempt for nonexistent user ('.*' )?from <HOST>:\d+$
-            ^[Bb]ad (PAM )?password attempt for .+ from <HOST>(:\d+)?$
+failregex = ^[Ll]ogin attempt for nonexistent user ('.*' )?from <HOST>:\\d+$
+            ^[Bb]ad (PAM )?password attempt for .+ from <HOST>(:\\d+)?$
 ```
 
 The official documentation provides general configuration guidance:

@@ -57,10 +57,10 @@ run_fail2ban_service_state: "enabled"
 
 # Fail2ban service configuration values.
 #
-# These settings are placed in a drop-in configuration file in `<config
-# dir>/fail2ban.d`. They take highest priority, overriding internal defaults
-# (see `__run_fail2ban_service_settings_defaults` in `vars/main.yml`) and
-# platform-specific overrides.
+# These settings are placed in a drop-in configuration file in
+# `<config dir>/fail2ban.d`. They take highest priority, overriding internal
+# defaults (see `__run_fail2ban_service_settings_defaults` in `vars/main.yml`)
+# and platform-specific overrides.
 #
 # Use standard Fail2ban section names as top-level YAML keys, and place their
 # corresponding option names and values inside each section. This YAML structure
@@ -107,6 +107,7 @@ run_fail2ban_service_state: "enabled"
 #
 # The official documentation provides general configuration guidance:
 #
+# - [`man fail2ban`](https://manpages.debian.org/testing/fail2ban/fail2ban.1.en.html)
 # - https://github.com/fail2ban/fail2ban/wiki/Best-practice
 # - https://github.com/fail2ban/fail2ban/wiki/Proper-fail2ban-configuration
 #
@@ -120,15 +121,15 @@ run_fail2ban_service_state: "enabled"
 # - Default: {}
 run_fail2ban_service_settings: {}
 
-# Filename of the drop-in configuration file to be placed in `<config
-# dir>/fail2ban.d`. Defaults to `99-managed.local`. The `99-` prefix in
+# Filename of the drop-in configuration file to be placed in
+# `<config dir>/fail2ban.d`. Defaults to `99-managed.local`. The `99-` prefix in
 # combination with the `.local` extension ensures later loading and thus higher
 # precedence over files with lower-numbered prefixes or `.conf` extension (cf.
 # `man jail.conf`).
 #
-# If a non-default filename is used, any existing `<config
-# dir>/fail2ban.d/99-managed.local` from previous Ansible runs will be removed
-# automatically to prevent conflicts.
+# If a non-default filename is used, any existing
+# `<config dir>/fail2ban.d/99-managed.local` from previous Ansible runs will be
+# removed automatically to prevent conflicts.
 #
 # - Type: str
 # - Required: No
@@ -137,9 +138,9 @@ run_fail2ban_config_service_dropin_file_name: "99-managed.local"
 
 # Fail2ban jail configuration values.
 #
-# These settings are placed in a drop-in configuration file in `<config
-# dir>/jail.d`. They take highest priority, overriding internal defaults (see
-# `__run_fail2ban_jail_settings_defaults` in `vars/main.yml`) and
+# These settings are placed in a drop-in configuration file in
+# `<config dir>/jail.d`. They take highest priority, overriding internal
+# defaults (see `__run_fail2ban_jail_settings_defaults` in `vars/main.yml`) and
 # platform-specific overrides.
 #
 # Use standard Fail2ban section names as top-level YAML keys, and place their
@@ -200,8 +201,8 @@ run_fail2ban_config_service_dropin_file_name: "99-managed.local"
 #
 # The official documentation provides general configuration guidance:
 #
-# - https://manpages.debian.org/testing/fail2ban/jail.conf.5.en.html
-# - https://manpages.debian.org/testing/fail2ban/fail2ban-regex.1.en.html
+# - [`man jail.conf`](https://manpages.debian.org/testing/fail2ban/jail.conf.5.en.html)
+# - [`man fail2ban-regex`](https://manpages.debian.org/testing/fail2ban/fail2ban-regex.1.en.html)
 # - https://github.com/fail2ban/fail2ban/wiki/Best-practice
 #
 # The unmodified default configuration is already a good starting point and
@@ -214,15 +215,15 @@ run_fail2ban_config_service_dropin_file_name: "99-managed.local"
 # - Default: {}
 run_fail2ban_jail_settings: {}
 
-# Filename of the drop-in configuration file to be placed in `<config
-# dir>/jail.d`. Defaults to `99-managed.local`. The `99-` prefix in combination
-# with the `.local` extension ensures later loading and thus higher precedence
-# over files with lower-numbered prefixes or `.conf` extension (cf. `man
-# jail.conf`).
+# Filename of the drop-in configuration file to be placed in
+# `<config dir>/jail.d`. Defaults to `99-managed.local`. The `99-` prefix in
+# combination with the `.local` extension ensures later loading and thus higher
+# precedence over files with lower-numbered prefixes or `.conf` extension (cf.
+# `man jail.conf`).
 #
-# If a non-default filename is used, any existing `<config
-# dir>/jail.d/99-managed.local` from previous Ansible runs will be removed
-# automatically to prevent conflicts.
+# If a non-default filename is used, any existing
+# `<config dir>/jail.d/99-managed.local` from previous Ansible runs will be
+# removed automatically to prevent conflicts.
 #
 # - Type: str
 # - Required: No
@@ -283,8 +284,8 @@ run_fail2ban_config_jail_dropin_file_name: "99-managed.local"
 #
 # The official documentation provides general configuration guidance:
 #
-# - https://manpages.debian.org/testing/fail2ban/jail.conf.5.en.html
-# - https://manpages.debian.org/testing/fail2ban/fail2ban-regex.1.en.html
+# - [`man jail.conf`](https://manpages.debian.org/testing/fail2ban/jail.conf.5.en.html)
+# - [`man fail2ban-regex`](https://manpages.debian.org/testing/fail2ban/fail2ban-regex.1.en.html)
 # - https://github.com/fail2ban/fail2ban/wiki/Best-practice
 #
 # Most users do not need custom filter as fail2ban ships with filters for common
@@ -350,7 +351,7 @@ run_fail2ban_custom_filters: {}
 #
 # The official documentation provides general configuration guidance:
 #
-# - https://manpages.debian.org/testing/fail2ban/jail.conf.5.en.html
+# - [`man jail.conf`](https://manpages.debian.org/testing/fail2ban/jail.conf.5.en.html)
 # - https://github.com/fail2ban/fail2ban/wiki/Best-practice
 #
 # Most users do not need custom actions as fail2ban ships with actions for
