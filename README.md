@@ -28,7 +28,28 @@ This repository contains the `foundata.fail2ban` Ansible Collection. It provides
 
 ### Role: `foundata.fail2ban.run`
 
-The primary resource in this collection to configure and maintain Fail2Ban, including jail configuration, filters, actions, and related settings. See the [role's `README.md`](./roles/run/README.md) for more information and usage examples.
+The primary role in this collection to configure and maintain Fail2Ban, including jail configuration, filters, actions, and related settings. [Its `README.md`](./roles/run/README.md) covers configuration, usage examples, and more:
+
+<!-- ANSIBLE DOCSMITH TOC-FULL run START -->
+- [Ansible role: `foundata.fail2ban.run`](roles/run/README.md#ansible-role-foundatafail2banrun)
+  - [Table of contents](roles/run/README.md#toc)
+  - [Features](roles/run/README.md#features)
+  - [Example playbooks, using this role](roles/run/README.md#examples)
+  - [Supported tags](roles/run/README.md#tags)
+  - [Role variables](roles/run/README.md#variables)
+    - [`run_fail2ban_state`](roles/run/README.md#variable-run_fail2ban_state)
+    - [`run_fail2ban_autoupgrade`](roles/run/README.md#variable-run_fail2ban_autoupgrade)
+    - [`run_fail2ban_service_state`](roles/run/README.md#variable-run_fail2ban_service_state)
+    - [`run_fail2ban_service_settings`](roles/run/README.md#variable-run_fail2ban_service_settings)
+    - [`run_fail2ban_config_service_dropin_file_name`](roles/run/README.md#variable-run_fail2ban_config_service_dropin_file_name)
+    - [`run_fail2ban_jail_settings`](roles/run/README.md#variable-run_fail2ban_jail_settings)
+    - [`run_fail2ban_config_jail_dropin_file_name`](roles/run/README.md#variable-run_fail2ban_config_jail_dropin_file_name)
+    - [`run_fail2ban_custom_filters`](roles/run/README.md#variable-run_fail2ban_custom_filters)
+    - [`run_fail2ban_custom_actions`](roles/run/README.md#variable-run_fail2ban_custom_actions)
+  - [Dependencies](roles/run/README.md#dependencies)
+  - [Compatibility](roles/run/README.md#compatibility)
+  - [External requirements](roles/run/README.md#requirements)
+<!-- ANSIBLE DOCSMITH TOC-FULL run END -->
 
 
 
