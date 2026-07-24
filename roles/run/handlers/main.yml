@@ -8,4 +8,4 @@
     state: "restarted"
   listen: "run_fail2ban: restart fail2ban.service"
   when:
-    - run_fail2ban_service_state != 'unmanaged'
+    - run_fail2ban_service_state in ['enabled', 'running']
