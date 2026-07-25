@@ -142,3 +142,43 @@
   loop_control:
     loop_var: "__run_fail2ban_effective_var"
     label: "{{ __run_fail2ban_effective_var }}"
+
+
+# The basename of a custom filter or action file is not cosmetic: it is the name
+# jails refer to via "filter = <name>" / "action = <name>". Silently normalizing
+# a key therefore produces a file the jail cannot resolve, and two keys that
+# normalize to the same name overwrite each other without a trace. Reject such
+# keys instead, so the file always lands exactly where the reference expects it.
+- name: "Init | Assert custom filter and action names are usable as filenames"
+  ansible.builtin.assert:
+    that:
+      - (__run_fail2ban_name_normalized | ansible.builtin.length) > 0
+      - __run_fail2ban_name_normalized == __run_fail2ban_name_item['key']
+    fail_msg: >-
+      The {{ __run_fail2ban_name_item['kind'] }} name '{{ __run_fail2ban_name_item['key'] }}' cannot be
+      used as a filename. Fail2ban resolves '{{ __run_fail2ban_name_item['kind'] }} = <name>' against the
+      file of the same name, so only lowercase letters, digits, '.', '_' and '-' are allowed
+      (it would become '{{ __run_fail2ban_name_normalized }}').
+    success_msg: >-
+      The {{ __run_fail2ban_name_item['kind'] }} name '{{ __run_fail2ban_name_item['key'] }}' is usable
+      as a filename.
+  vars:
+    __run_fail2ban_name_normalized: >-
+      {{
+        __run_fail2ban_name_item['key']
+        | ansible.builtin.lower
+        | ansible.builtin.regex_replace('[^a-z0-9._-]', '_')
+        | ansible.builtin.regex_replace('_+', '_')
+        | ansible.builtin.regex_replace('^_|_$', '')
+      }}
+  loop: >-
+    {{
+      ((run_fail2ban_custom_filters | ansible.builtin.default({}) | ansible.builtin.dict2items)
+       | ansible.builtin.map('ansible.builtin.combine', {'kind': 'filter'}) | ansible.builtin.list)
+      +
+      ((run_fail2ban_custom_actions | ansible.builtin.default({}) | ansible.builtin.dict2items)
+       | ansible.builtin.map('ansible.builtin.combine', {'kind': 'action'}) | ansible.builtin.list)
+    }}
+  loop_control:
+    loop_var: "__run_fail2ban_name_item"
+    label: "{{ __run_fail2ban_name_item['kind'] }}: {{ __run_fail2ban_name_item['key'] }}"

@@ -1,0 +1,13 @@
+---
+
+minor_changes:
+  - >
+    ``run`` role - The keys of ``run_fail2ban_custom_filters`` and
+    ``run_fail2ban_custom_actions`` are now checked to be usable as filenames.
+    The basename of such a file is what jails refer to via ``filter = <name>`` or
+    ``action = <name>``, but the keys were silently normalized (lowercased, with
+    every character outside ``a-z0-9._-`` replaced). A key like ``My Filter``
+    therefore produced ``my_filter.local``, which no jail referring to
+    ``My Filter`` could resolve, and two keys normalizing to the same name
+    overwrote each other. Such keys are now rejected with an explanatory message
+    instead of producing a file that cannot be referenced.
