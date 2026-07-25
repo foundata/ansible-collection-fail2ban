@@ -487,3 +487,62 @@
           - "'polling' in __run_fail2ban_detected_backends"
         fail_msg: "__run_fail2ban_detected_backends did not reflect the merged jail settings."
         success_msg: "__run_fail2ban_detected_backends correctly reflects the merged jail settings."
+
+
+## Configuration validation before restart
+#
+# The role notifies a validation handler before the restart handler, so a broken
+# configuration must fail the run while the daemon keeps serving the previous
+# one. Without that guard the restart handler would activate whatever was
+# written and take the protection down.
+#
+# Plant a jail that references a filter which does not exist (the failure mode
+# a typo in "filter" produces), flush the handlers and expect the validation to
+# fail. The file is removed again in "always", so the remaining tasks and the
+# cleanup stage see the managed configuration.
+
+- name: "Molecule | Verify | Validate that a broken configuration cannot reach the service (integration)"
+  vars:
+    __testing_broken_jail_path: "{{ __run_fail2ban_config_jail_dropin_dir_path }}/00-molecule-broken.local"
+  block:
+
+    - name: "Molecule | Verify | Plant a jail referencing a filter that does not exist"
+      ansible.builtin.copy:
+        content: |
+          [molecule-broken]
+          enabled = true
+          filter = molecule-filter-that-does-not-exist
+        dest: "{{ __testing_broken_jail_path }}"
+        owner: "root"
+        group: "root"
+        mode: "u=rw,g=r,o=r" # 0644
+      notify:
+        - "run_fail2ban: validate configuration"
+        - "run_fail2ban: restart fail2ban.service"
+
+    - name: "Molecule | Verify | Run the validation handler against the broken configuration"
+      ansible.builtin.meta: flush_handlers
+
+    - name: "Molecule | Verify | Fail because the broken configuration was accepted"
+      ansible.builtin.fail:
+        msg: >-
+          The configuration validation accepted a jail referencing a non-existent filter,
+          so a broken configuration would reach the service restart.
+
+  rescue:
+
+    - name: "Molecule | Verify | Assert the run failed in the validation handler"
+      ansible.builtin.assert:
+        that:
+          - (ansible_failed_task['name'] | ansible.builtin.default('')) is ansible.builtin.search('Validate Fail2ban configuration')
+        fail_msg: >-
+          The run failed, but not in the validation handler as expected
+          (failed task: '{{ ansible_failed_task['name'] | ansible.builtin.default('unknown') }}').
+        success_msg: "A broken configuration is rejected by the validation handler before the service is restarted."
+
+  always:
+
+    - name: "Molecule | Verify | Remove the broken jail again"
+      ansible.builtin.file:
+        path: "{{ __testing_broken_jail_path }}"
+        state: "absent"

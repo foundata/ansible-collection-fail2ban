@@ -2,6 +2,29 @@
 
 ---
 
+# Defined before the restart handler on purpose: handlers run in the order they
+# are defined here, not in the order they are notified, so a broken
+# configuration fails the run while the daemon keeps serving its previous one.
+#
+# "fail2ban-client -t" resolves the whole /etc/fail2ban tree and catches what
+# actually breaks a restart in practice: malformed INI, unknown sections and
+# jails referencing a filter or action that does not exist. It does not compile
+# the "failregex" patterns, so a syntactically broken regex inside a custom
+# filter still passes here.
+- name: "Handlers | Validate Fail2ban configuration"
+  ansible.builtin.command:
+    argv:
+      - "{{ __run_fail2ban_client_exec_path }}"
+      - "-t"
+  register: __run_fail2ban_validation_result
+  changed_when:
+    - false
+  failed_when:
+    - __run_fail2ban_validation_result is ansible.builtin.failed
+  listen:
+    - "run_fail2ban: validate configuration"
+
+
 - name: "Handlers | fail2ban.service restart"
   ansible.builtin.systemd_service:
     name: "{{ __run_fail2ban_fail2ban_servicename }}"

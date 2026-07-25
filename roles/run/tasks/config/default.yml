@@ -12,6 +12,7 @@
     group: "{{ __run_fail2ban_config_service_dropin_dir_group }}"
     mode: "{{ __run_fail2ban_config_service_dropin_dir_mode }}"
   notify:
+    - "run_fail2ban: validate configuration"
     - "run_fail2ban: restart fail2ban.service"
 
 
@@ -26,6 +27,7 @@
     # Pass (and/or adjust) variables needed for the template
     tpl_settings: "{{ __run_fail2ban_effective_service_settings }}"
   notify:
+    - "run_fail2ban: validate configuration"
     - "run_fail2ban: restart fail2ban.service"
 
 
@@ -36,6 +38,7 @@
   when:
     - __run_fail2ban_config_service_dropin_file_path != __run_fail2ban_config_service_dropin_file_path_default
   notify:
+    - "run_fail2ban: validate configuration"
     - "run_fail2ban: restart fail2ban.service"
 
 ## Jails
@@ -48,6 +51,7 @@
     group: "{{ __run_fail2ban_config_jail_dropin_dir_group }}"
     mode: "{{ __run_fail2ban_config_jail_dropin_dir_mode }}"
   notify:
+    - "run_fail2ban: validate configuration"
     - "run_fail2ban: restart fail2ban.service"
 
 
@@ -62,6 +66,7 @@
     # Pass (and/or adjust) variables needed for the template
     tpl_settings: "{{ __run_fail2ban_effective_jail_settings }}"
   notify:
+    - "run_fail2ban: validate configuration"
     - "run_fail2ban: restart fail2ban.service"
 
 
@@ -72,6 +77,7 @@
   when:
     - __run_fail2ban_config_jail_dropin_file_path != __run_fail2ban_config_jail_dropin_file_path_default
   notify:
+    - "run_fail2ban: validate configuration"
     - "run_fail2ban: restart fail2ban.service"
 
 
@@ -85,6 +91,7 @@
     group: "{{ __run_fail2ban_config_filter_dropin_dir_group }}"
     mode: "{{ __run_fail2ban_config_filter_dropin_dir_mode }}"
   notify:
+    - "run_fail2ban: validate configuration"
     - "run_fail2ban: restart fail2ban.service"
 
 
@@ -117,6 +124,7 @@
   when:
     - ((run_fail2ban_custom_filters | ansible.builtin.default({})) | ansible.builtin.length) > 0
   notify:
+    - "run_fail2ban: validate configuration"
     - "run_fail2ban: restart fail2ban.service"
 
 
@@ -130,6 +138,7 @@
     group: "{{ __run_fail2ban_config_action_dropin_dir_group }}"
     mode: "{{ __run_fail2ban_config_action_dropin_dir_mode }}"
   notify:
+    - "run_fail2ban: validate configuration"
     - "run_fail2ban: restart fail2ban.service"
 
 
@@ -162,4 +171,5 @@
   when:
     - ((run_fail2ban_custom_actions | ansible.builtin.default({})) | ansible.builtin.length) > 0
   notify:
+    - "run_fail2ban: validate configuration"
     - "run_fail2ban: restart fail2ban.service"

@@ -1,0 +1,17 @@
+---
+
+minor_changes:
+  - >
+    ``run`` role - The configuration is now validated with ``fail2ban-client -t``
+    before the service is restarted. Previously any rendered configuration went
+    straight to a restart, so a jail referencing a filter or action that does not
+    exist, or a malformed drop-in, took the running protection down instead of
+    failing the Ansible run. The daemon now keeps serving its previous
+    configuration when validation fails.
+
+known_issues:
+  - >
+    ``run`` role - The configuration validation (``fail2ban-client -t``) resolves
+    the configuration tree but does not compile the ``failregex`` patterns, so a
+    syntactically broken regular expression inside a custom filter is not
+    detected by it.
