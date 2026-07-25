@@ -265,6 +265,68 @@
     success_msg: "Fail2ban service '{{ __run_fail2ban_fail2ban_servicename }}' is running"
 
 
+## Effective protection state
+#
+# A running unit and a valid config on disk do not prove that the host is
+# actually protected: systemd reports the unit as "running" even when every jail
+# failed to come up, and "fail2ban-client -d" only dumps what it parses from the
+# files without ever contacting the server. Both would still pass if the restart
+# handler had silently not fired and the daemon still ran the previous config.
+#
+# Query the running server instead: the socket must answer, the jail the role
+# enables by default must be active, and a value that is only set in the user's
+# jail settings must have arrived in the daemon's own state.
+
+- name: "Molecule | Verify | Ping the running Fail2ban server"
+  ansible.builtin.command:
+    argv:
+      - "{{ __run_fail2ban_client_exec_path }}"
+      - "ping"
+  register: __testing_fail2ban_ping
+  changed_when: false
+
+
+- name: "Molecule | Verify | Get the jails the running Fail2ban server has active"
+  ansible.builtin.command:
+    argv:
+      - "{{ __run_fail2ban_client_exec_path }}"
+      - "status"
+  register: __testing_fail2ban_status
+  changed_when: false
+
+
+- name: "Molecule | Verify | Get the effective maxretry of the sshd jail from the running server"
+  ansible.builtin.command:
+    argv:
+      - "{{ __run_fail2ban_client_exec_path }}"
+      - "get"
+      - "sshd"
+      - "maxretry"
+  register: __testing_fail2ban_sshd_maxretry
+  changed_when: false
+
+
+- name: "Molecule | Verify | Assert the running server is protecting the host with the configured settings"
+  ansible.builtin.assert:
+    that:
+      # the server socket answers, so the daemon is up and reachable
+      - "'pong' in __testing_fail2ban_ping['stdout']"
+      # the sshd jail is enabled by the role's defaults and must be active even
+      # though the converge disables jails globally via DEFAULT.enabled
+      - "'sshd' in __testing_fail2ban_status['stdout']"
+      # 19 comes from run_fail2ban_jail_settings and overrides the role default
+      # of 5, so seeing it here proves the restart applied the managed config
+      - "'19' in __testing_fail2ban_sshd_maxretry['stdout']"
+    fail_msg: >-
+      The running Fail2ban server does not reflect the managed configuration.
+      ping: '{{ __testing_fail2ban_ping['stdout'] | ansible.builtin.trim }}',
+      status: '{{ __testing_fail2ban_status['stdout'] | ansible.builtin.trim }}',
+      sshd maxretry: '{{ __testing_fail2ban_sshd_maxretry['stdout'] | ansible.builtin.trim }}'.
+    success_msg: >-
+      The running Fail2ban server answers on its socket, has the sshd jail active and
+      applied the configured maxretry.
+
+
 ## Main configuration
 
 - name: "Molecule | Verify | Read service drop-in config file content"
