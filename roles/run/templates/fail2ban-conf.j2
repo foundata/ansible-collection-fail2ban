@@ -9,8 +9,11 @@
   - Lists render as space-separated.
   - Multiline strings align continuation lines to the value column.
   - Special top-level key "content" is appended raw at end (with a blank line before it).
--#}
 
+  The first output line is the role's ownership marker (load-bearing for the
+  cleanup logic - do not change its format).
+-#}
+{{ __run_fail2ban_config_file_marker }}
 # {{ ansible_managed }}
 {%  set settings = tpl_settings | ansible.builtin.default({}) %}
 {%  set raw_content = (settings.get('content') if settings is mapping else none) %}

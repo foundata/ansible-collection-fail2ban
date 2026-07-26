@@ -412,6 +412,97 @@
           The backend-specific package 'python3-inotify' is installed as expected.
 
 
+## Reaping of stale role-created files (integration)
+#
+# Files whose keys were renamed or removed are identified by the ownership
+# marker line and removed by the role; files without the marker are never
+# touched. Plant a marker-bearing orphan in filter.d and action.d plus a
+# hand-made decoy without the marker, re-run the role with the converge
+# settings and assert only the orphans are gone while the declared custom
+# filter and action files survive.
+#
+# This block must run before the init-only merge checks below: those overwrite
+# the run_fail2ban_* facts with controlled inputs that must not reach a full
+# role run.
+
+- name: "Molecule | Verify | Validate reaping of stale role-created files (integration)"
+  vars:
+    __testing_stale_filter_path: "{{ __run_fail2ban_config_filter_dropin_dir_path }}/molecule-stale-filter.local"
+    __testing_stale_action_path: "{{ __run_fail2ban_config_action_dropin_dir_path }}/molecule-stale-action.local"
+    __testing_decoy_filter_path: "{{ __run_fail2ban_config_filter_dropin_dir_path }}/molecule-admin-filter.local"
+  block:
+
+    - name: "Molecule | Verify | Plant stale marker-bearing files and a hand-made decoy"
+      ansible.builtin.copy:
+        content: "{{ item['content'] }}"
+        dest: "{{ item['dest'] }}"
+        owner: "root"
+        group: "root"
+        mode: "u=rw,g=r,o=r" # 0644
+      loop:
+        - dest: "{{ __testing_stale_filter_path }}"
+          content: |
+            {{ __run_fail2ban_config_file_marker }}
+            [Definition]
+            failregex =
+        - dest: "{{ __testing_stale_action_path }}"
+          content: |
+            {{ __run_fail2ban_config_file_marker }}
+            [Definition]
+        - dest: "{{ __testing_decoy_filter_path }}"
+          content: |
+            [Definition]
+            failregex =
+      loop_control:
+        label: "{{ item['dest'] }}"
+
+    - name: "Molecule | Verify | Re-run the foundata.fail2ban.run role"
+      ansible.builtin.include_role:
+        name: "foundata.fail2ban.run"
+
+    - name: "Molecule | Verify | Flush the handlers notified by the cleanup"
+      ansible.builtin.meta: flush_handlers
+
+    - name: "Molecule | Verify | Get the status of the planted and declared files after the re-run"
+      ansible.builtin.stat:
+        path: "{{ item }}"
+      register: __testing_reap_stat
+      loop:
+        - "{{ __testing_stale_filter_path }}"
+        - "{{ __testing_stale_action_path }}"
+        - "{{ __testing_decoy_filter_path }}"
+        - "{{ __testing_custom_filter_file_path }}"
+        - "{{ __testing_custom_action_file_path }}"
+
+    - name: "Molecule | Verify | Assert only the stale marker-bearing files were removed"
+      ansible.builtin.assert:
+        that:
+          - not __testing_reap_stat['results'][0]['stat']['exists']
+          - not __testing_reap_stat['results'][1]['stat']['exists']
+          - __testing_reap_stat['results'][2]['stat']['exists']
+          - __testing_reap_stat['results'][3]['stat']['exists']
+          - __testing_reap_stat['results'][4]['stat']['exists']
+        fail_msg: >-
+          The role did not reap exactly the stale marker-bearing files:
+          {{ __testing_reap_stat['results'] | ansible.builtin.map(attribute='stat.exists') | ansible.builtin.list }}
+          for {{ __testing_reap_stat['results'] | ansible.builtin.map(attribute='item') | ansible.builtin.list }}
+          (expected [false, false, true, true, true]).
+        success_msg: >-
+          The role removed the stale marker-bearing files and left the hand-made
+          decoy and the declared custom filter and action files untouched.
+
+  always:
+
+    - name: "Molecule | Verify | Remove the planted files again"
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: "absent"
+      loop:
+        - "{{ __testing_stale_filter_path }}"
+        - "{{ __testing_stale_action_path }}"
+        - "{{ __testing_decoy_filter_path }}"
+
+
 ## Init-only merged variable evaluation
 #
 # Re-run the role's init with controlled inputs and assert the merged variables

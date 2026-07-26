@@ -150,6 +150,31 @@ __run_fail2ban_config_action_dropin_file_owner: "{{ __run_fail2ban_config_servic
 __run_fail2ban_config_action_dropin_file_group: "{{ __run_fail2ban_config_service_file_group }}"
 __run_fail2ban_config_action_dropin_file_mode: "{{ __run_fail2ban_config_service_file_mode }}"
 
+# Ownership marker, written as the first line of every file this role creates
+# in the shared Fail2ban configuration directories. Load-bearing for the
+# cleanup logic: only files carrying this exact line are ever removed, files
+# without it (distribution defaults, hand-made admin files) are never touched.
+__run_fail2ban_config_file_marker: "# Managed by Ansible (foundata.fail2ban.run)"
+
+# Files currently declared through role variables, kept by the cleanup logic.
+# Custom filter and action keys are used verbatim as basenames: init.yml
+# asserts they survive filename normalization unchanged.
+__run_fail2ban_config_managed_file_paths: >-
+  {{
+    [
+      __run_fail2ban_config_service_dropin_file_path,
+      __run_fail2ban_config_jail_dropin_file_path
+    ]
+    + ((run_fail2ban_custom_filters | ansible.builtin.default({})).keys()
+       | ansible.builtin.map('ansible.builtin.regex_replace', '^', __run_fail2ban_config_filter_dropin_dir_path ~ '/')
+       | ansible.builtin.map('ansible.builtin.regex_replace', '$', '.local')
+       | ansible.builtin.list)
+    + ((run_fail2ban_custom_actions | ansible.builtin.default({})).keys()
+       | ansible.builtin.map('ansible.builtin.regex_replace', '^', __run_fail2ban_config_action_dropin_dir_path ~ '/')
+       | ansible.builtin.map('ansible.builtin.regex_replace', '$', '.local')
+       | ansible.builtin.list)
+  }}
+
 
 # Daemon service name and paths of executables for management and validation.
 __run_fail2ban_fail2ban_servicename: "fail2ban.service"
@@ -159,6 +184,7 @@ __run_fail2ban_regex_exec_path: "/usr/bin/fail2ban-regex"
 
 
 # Paths of other executables and resources.
+__run_fail2ban_grep_exec_path: "/usr/bin/grep"
 __run_fail2ban_sha1sum_exec_path: "/usr/bin/sha1sum"
 __run_fail2ban_touch_exec_path: "/usr/bin/touch"
 __run_fail2ban_chmod_exec_path: "/usr/bin/chmod"

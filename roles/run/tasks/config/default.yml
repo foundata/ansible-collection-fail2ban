@@ -173,3 +173,53 @@
   notify:
     - "run_fail2ban: validate configuration"
     - "run_fail2ban: restart fail2ban.service"
+
+
+## Cleanup: reap files this role created for keys or filenames that were
+## renamed or removed. Ownership is proven by the marker line the template
+## writes as first line: only files carrying it are candidates, distribution
+## defaults and hand-made admin files are never touched.
+
+- name: "Config | Default | Find files in the managed Fail2ban configuration directories"
+  ansible.builtin.find:
+    paths:
+      - "{{ __run_fail2ban_config_service_dropin_dir_path }}"
+      - "{{ __run_fail2ban_config_jail_dropin_dir_path }}"
+      - "{{ __run_fail2ban_config_filter_dropin_dir_path }}"
+      - "{{ __run_fail2ban_config_action_dropin_dir_path }}"
+    file_type: "file"
+    hidden: true
+  register: __run_fail2ban_find_result
+
+
+- name: "Config | Default | Determine stale files created by this role"
+  ansible.builtin.command:
+    argv: >-
+      {{
+        [__run_fail2ban_grep_exec_path, '-l', '-s', '--', __run_fail2ban_config_file_marker]
+        + __run_fail2ban_stale_candidates
+      }}
+  register: __run_fail2ban_stale_result
+  changed_when: false
+  failed_when:
+    - __run_fail2ban_stale_result['rc'] not in [0, 1, 2]
+  vars:
+    __run_fail2ban_stale_candidates: >-
+      {{
+        __run_fail2ban_find_result['files']
+        | ansible.builtin.map(attribute='path')
+        | ansible.builtin.reject('in', __run_fail2ban_config_managed_file_paths)
+        | ansible.builtin.list
+      }}
+  when:
+    - (__run_fail2ban_stale_candidates | ansible.builtin.length) > 0
+
+
+- name: "Config | Default | Remove stale files created by this role"
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: "absent"
+  loop: "{{ __run_fail2ban_stale_result['stdout_lines'] | ansible.builtin.default([]) }}"
+  notify:
+    - "run_fail2ban: validate configuration"
+    - "run_fail2ban: restart fail2ban.service"

@@ -1,0 +1,18 @@
+---
+
+minor_changes:
+  - >
+    ``run`` role - Files created by the role in the shared Fail2ban
+    configuration directories now start with an ownership marker line. Files
+    carrying the marker whose ``run_fail2ban_custom_filters`` or
+    ``run_fail2ban_custom_actions`` key was renamed or removed (or whose
+    drop-in filename changed) are now removed automatically; distribution
+    defaults and hand-made files are never touched. Files created by earlier
+    releases do not carry the marker yet: still-declared ones get it on the
+    next run, already orphaned ones must be removed manually once.
+
+bugfixes:
+  - >
+    ``run`` role - ``run_fail2ban_state: "absent"`` now also removes custom
+    filter and action files created by the role (identified by the ownership
+    marker). They were left behind before.

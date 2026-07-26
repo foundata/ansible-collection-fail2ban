@@ -493,6 +493,10 @@ Most users do not need custom filter as fail2ban ships with filters for common
 services like SSH or NGINX. If empty dict (default), no custom filters are
 managed.
 
+The role marks the resulting files with an ownership marker line and
+automatically removes files of keys that were later renamed or removed.
+Distribution defaults and hand-made files are never touched.
+
 - **Type**: `dict`
 - **Required**: No
 - **Default**: `{}`
@@ -563,6 +567,10 @@ The official documentation provides general configuration guidance:
 Most users do not need custom actions as fail2ban ships with actions for
 common firewall backends. If empty dict (default), no custom actions are
 managed.
+
+The role marks the resulting files with an ownership marker line and
+automatically removes files of keys that were later renamed or removed.
+Distribution defaults and hand-made files are never touched.
 
 - **Type**: `dict`
 - **Required**: No
