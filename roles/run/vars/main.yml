@@ -279,7 +279,7 @@ __run_fail2ban_detected_backends: >-
   {{
     __run_fail2ban_effective_jail_settings.values()
     | ansible.builtin.select('mapping')
-    | ansible.builtin.selectattr('backend', 'defined')
+    | ansible.builtin.selectattr('backend', 'ansible.builtin.defined')
     | ansible.builtin.map(attribute='backend')
     | ansible.builtin.list
     | ansible.builtin.unique

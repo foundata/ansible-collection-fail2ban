@@ -28,7 +28,7 @@
     {{
       __run_fail2ban_detected_backends
       | ansible.builtin.default([])
-      | ansible.builtin.select('in', __run_fail2ban_packages_install_map_backends.keys() | list)
+      | ansible.builtin.select('ansible.builtin.in', __run_fail2ban_packages_install_map_backends.keys() | ansible.builtin.list)
       | ansible.builtin.list
     }}
   when:

@@ -208,7 +208,7 @@
       {{
         __run_fail2ban_find_result['files']
         | ansible.builtin.map(attribute='path')
-        | ansible.builtin.reject('in', __run_fail2ban_config_managed_file_paths)
+        | ansible.builtin.reject('ansible.builtin.in', __run_fail2ban_config_managed_file_paths)
         | ansible.builtin.list
       }}
   when:
