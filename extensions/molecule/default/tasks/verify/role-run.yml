@@ -503,6 +503,77 @@
         - "{{ __testing_decoy_filter_path }}"
 
 
+## Regression: broken failregex in a managed custom filter must fail validation
+#
+# "fail2ban-client -t" does not compile failregex patterns, and the daemon
+# even starts with such a jail half-configured: its setup stream aborts at the
+# broken pattern, so the jail has no log files attached and silently monitors
+# nothing while the service reports success. The dedicated compile step in the
+# validation handler chain must reject the filter before the restart.
+
+- name: "Molecule | Verify | Validate a broken failregex is rejected (integration)"
+  vars:
+    __testing_broken_filter_path: "{{ __run_fail2ban_config_filter_dropin_dir_path }}/molecule-broken-regex.local"
+  block:
+
+    - name: "Molecule | Verify | Save the converge custom filters"
+      ansible.builtin.set_fact:
+        __testing_customfilters_saved: "{{ run_fail2ban_custom_filters | ansible.builtin.default({}) }}"
+
+    - name: "Molecule | Verify | Add a custom filter with a broken failregex"
+      ansible.builtin.set_fact:
+        run_fail2ban_custom_filters: >-
+          {{
+            __testing_customfilters_saved
+            | ansible.builtin.combine({'molecule-broken-regex':
+                {'Definition': {'failregex': '^.*<HOST>(unbalanced'}}})
+          }}
+
+    - name: "Molecule | Verify | Re-run the foundata.fail2ban.run role with the broken filter"
+      ansible.builtin.include_role:
+        name: "foundata.fail2ban.run"
+
+    - name: "Molecule | Verify | Run the validation handlers against the broken filter"
+      ansible.builtin.meta: flush_handlers
+
+    - name: "Molecule | Verify | Fail because the broken failregex was accepted"
+      ansible.builtin.fail:
+        msg: >-
+          The validation accepted a custom filter with a failregex that cannot
+          be compiled, so a silently broken jail would reach the service.
+
+  rescue:
+
+    - name: "Molecule | Verify | Assert the run failed in the filter compilation"
+      ansible.builtin.assert:
+        that:
+          - >-
+            (ansible_failed_task['name'] | ansible.builtin.default(''))
+            is ansible.builtin.search('regex compilation')
+        fail_msg: >-
+          The run failed, but not in the custom filter compilation as expected
+          (failed task: '{{ ansible_failed_task['name'] | ansible.builtin.default('unknown') }}').
+        success_msg: "A broken failregex is rejected by the validation handlers before the restart."
+
+  always:
+
+    - name: "Molecule | Verify | Restore the converge custom filters"
+      ansible.builtin.set_fact:
+        run_fail2ban_custom_filters: "{{ __testing_customfilters_saved }}"
+
+    - name: "Molecule | Verify | Remove the broken filter file again"
+      ansible.builtin.file:
+        path: "{{ __testing_broken_filter_path }}"
+        state: "absent"
+
+    - name: "Molecule | Verify | Check the service survived with its previous configuration"
+      ansible.builtin.command:
+        argv:
+          - "/usr/bin/fail2ban-client"
+          - "status"
+      changed_when: false
+
+
 ## Init-only merged variable evaluation
 #
 # Re-run the role's init with controlled inputs and assert the merged variables

@@ -25,6 +25,28 @@
     - "run_fail2ban: validate configuration"
 
 
+# "fail2ban-client -t" does not compile the failregex/ignoreregex patterns
+# (see above), and the daemon even starts with a half-configured jail when a
+# pattern is broken: the jail's setup stream aborts at the broken pattern, so
+# it ends up without its log files and silently monitors nothing while
+# fail2ban.service reports success. Compile every managed custom filter
+# explicitly (against an empty log) so a broken pattern fails the run here,
+# while the daemon keeps serving its previous configuration.
+- name: "Handlers | Validate the managed custom filters (regex compilation)"
+  ansible.builtin.command:
+    argv:
+      - "{{ __run_fail2ban_regex_exec_path }}"
+      - "/dev/null"
+      - "{{ __run_fail2ban_config_filter_dropin_dir_path }}/{{ item }}.local"
+  changed_when:
+    - false
+  loop: "{{ (run_fail2ban_custom_filters | ansible.builtin.default({})).keys() | ansible.builtin.list }}"
+  loop_control:
+    label: "{{ item }}.local"
+  listen:
+    - "run_fail2ban: validate configuration"
+
+
 - name: "Handlers | fail2ban.service restart"
   ansible.builtin.systemd_service:
     name: "{{ __run_fail2ban_fail2ban_servicename }}"

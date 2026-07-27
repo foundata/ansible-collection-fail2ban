@@ -1,0 +1,10 @@
+---
+
+bugfixes:
+  - >
+    ``run`` role - The configuration validation now compiles every managed
+    custom filter with ``fail2ban-regex`` before the service is restarted.
+    ``fail2ban-client -t`` does not compile ``failregex`` patterns, and the
+    daemon even starts with such a jail half-configured (it ends up without
+    its log files attached and silently monitors nothing while the service
+    reports success), so a broken pattern previously went unnoticed.
