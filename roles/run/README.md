@@ -168,8 +168,8 @@ The following variables can be configured for this role:
 | `run_fail2ban_config_service_dropin_file_name` | `str` | No | `"99-managed.local"` | Filename of the drop-in configuration file to be placed in `/fail2ban.d`. Defaults to `99-managed.local`. The `99-` prefix in combination with the `.local` extension ensures later loading and thus higher precedence over files with lower-numbered […](#variable-run_fail2ban_config_service_dropin_file_name) |
 | `run_fail2ban_jail_settings` | `dict` | No | `{}` | Fail2ban jail configuration values.<br><br>These settings are placed in a drop-in configuration file in `/jail.d`. They take highest priority, overriding internal defaults (see `__run_fail2ban_jail_settings_defaults` in `vars/main.yml`) and […](#variable-run_fail2ban_jail_settings) |
 | `run_fail2ban_config_jail_dropin_file_name` | `str` | No | `"99-managed.local"` | Filename of the drop-in configuration file to be placed in `/jail.d`. Defaults to `99-managed.local`. The `99-` prefix in combination with the `.local` extension ensures later loading and thus higher precedence over files with lower-numbered prefixes […](#variable-run_fail2ban_config_jail_dropin_file_name) |
-| `run_fail2ban_custom_filters` | `dict` | No | `{}` | Custom filter definitions to be placed in `/filter.d/`. Filters define the regex patterns used to detect intrusion attempts in log files.<br><br>Use filter names as top-level YAML keys (will create `filter.d/.conf`) Use section names as 2nd-level […](#variable-run_fail2ban_custom_filters) |
-| `run_fail2ban_custom_actions` | `dict` | No | `{}` | Custom action definitions to be placed in `/action.d/`. Actions define what happens when an IP is banned or unbanned (e.g., firewall rules, notifications).<br><br>Use action names as top-level YAML keys (will create `action.d/.conf`) Use section […](#variable-run_fail2ban_custom_actions) |
+| `run_fail2ban_custom_filters` | `dict` | No | `{}` | Custom filter definitions to be placed in `/filter.d/`. Filters define the regex patterns used to detect intrusion attempts in log files.<br><br>Use filter names as top-level YAML keys (will create `filter.d/.local`) Use section names as 2nd-level […](#variable-run_fail2ban_custom_filters) |
+| `run_fail2ban_custom_actions` | `dict` | No | `{}` | Custom action definitions to be placed in `/action.d/`. Actions define what happens when an IP is banned or unbanned (e.g., firewall rules, notifications).<br><br>Use action names as top-level YAML keys (will create `action.d/.local`) Use section […](#variable-run_fail2ban_custom_actions) |
 
 ### `run_fail2ban_state`<a id="variable-run_fail2ban_state"></a>
 
@@ -435,7 +435,7 @@ will be removed automatically to prevent conflicts.
 Custom filter definitions to be placed in `<config dir>/filter.d/`. Filters
 define the regex patterns used to detect intrusion attempts in log files.
 
-Use filter names as top-level YAML keys (will create `filter.d/<name>.conf`)
+Use filter names as top-level YAML keys (will create `filter.d/<name>.local`)
 Use section names as 2nd-level YAML keys, and place their corresponding option
 names and values inside each section. This YAML structure is directly
 translated into Fail2ban's INI format, preserving section names and option
@@ -511,7 +511,7 @@ Custom action definitions to be placed in `<config dir>/action.d/`. Actions
 define what happens when an IP is banned or unbanned (e.g., firewall rules,
 notifications).
 
-Use action names as top-level YAML keys (will create `action.d/<name>.conf`)
+Use action names as top-level YAML keys (will create `action.d/<name>.local`)
 Use section names as 2nd-level YAML keys, and place their corresponding option
 names and values inside each section. This YAML structure is directly
 translated into Fail2ban's INI format, preserving section names and option

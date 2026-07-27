@@ -238,7 +238,7 @@ argument_specs:
           Custom filter definitions to be placed in `<config dir>/filter.d/`. Filters
           define the regex patterns used to detect intrusion attempts in log files.
 
-          Use filter names as top-level YAML keys (will create `filter.d/<name>.conf`)
+          Use filter names as top-level YAML keys (will create `filter.d/<name>.local`)
           Use section names as 2nd-level YAML keys, and place their corresponding option
           names and values inside each section. This YAML structure is directly
           translated into Fail2ban's INI format, preserving section names and option
@@ -308,7 +308,7 @@ argument_specs:
           define what happens when an IP is banned or unbanned (e.g., firewall rules,
           notifications).
 
-          Use action names as top-level YAML keys (will create `action.d/<name>.conf`)
+          Use action names as top-level YAML keys (will create `action.d/<name>.local`)
           Use section names as 2nd-level YAML keys, and place their corresponding option
           names and values inside each section. This YAML structure is directly
           translated into Fail2ban's INI format, preserving section names and option

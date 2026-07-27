@@ -1,0 +1,9 @@
+---
+
+bugfixes:
+  - >
+    ``run`` role - Documentation: the ``run_fail2ban_custom_filters`` and
+    ``run_fail2ban_custom_actions`` descriptions claimed the role creates
+    ``<name>.conf`` files; the role creates ``<name>.local`` files (as the
+    examples already showed), which take precedence over same-named ``.conf``
+    files per Fail2ban's configuration order.
