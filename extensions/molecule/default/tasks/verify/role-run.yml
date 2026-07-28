@@ -708,3 +708,83 @@
       ansible.builtin.file:
         path: "{{ __testing_broken_jail_path }}"
         state: "absent"
+
+    # The failed flush above leaves the other notified listeners (custom
+    # filter validation, service restart) pending. Run them now against the
+    # restored valid configuration - deferred to the end of the play they
+    # would fire after the uninstall block below has removed Fail2ban.
+    - name: "Molecule | Verify | Run the remaining notified handlers against the restored configuration"
+      ansible.builtin.meta: "flush_handlers"
+
+
+## Uninstall (state "absent") verification
+#
+# This block stays the LAST one in the verify stage: it converges the
+# instances away from the state every earlier check relies on. It is
+# deliberately not part of the cleanup stage - cleanup also runs when an
+# earlier stage fails (on arbitrary state) and has to stay assertion-free.
+
+# Simulate a file whose name can no longer be derived from the current
+# variables (a filter renamed or de-listed since deployment). It carries the
+# role's ownership marker, so the uninstall has to find it via the marker
+# sweep of the managed directories.
+- name: "Molecule | Verify | Uninstall: plant a historical role-managed filter file"
+  ansible.builtin.copy:
+    dest: "/etc/fail2ban/filter.d/renamed-historical.local"
+    content: |
+      # Managed by Ansible (foundata.fail2ban.run)
+      [Definition]
+      failregex = ^historical$
+    owner: "root"
+    group: "root"
+    mode: "u=rw,g=r,o=r"
+
+
+# An administrator's own drop-in (no ownership marker): the sweep must leave
+# it alone even though it lives in a managed directory.
+- name: "Molecule | Verify | Uninstall: plant an administrator-owned drop-in without the marker"
+  ansible.builtin.copy:
+    dest: "/etc/fail2ban/jail.d/98-admin-own.local"
+    content: |
+      # hand-made by the administrator, not Ansible
+      [sshd]
+      enabled = false
+    owner: "root"
+    group: "root"
+    mode: "u=rw,g=r,o=r"
+
+
+- name: "Molecule | Verify | Uninstall: run the role with state 'absent'"
+  ansible.builtin.include_role:
+    name: "foundata.fail2ban.run"
+  vars:
+    run_fail2ban_state: "absent"
+    run_fail2ban_config_service_dropin_file_name: "99-custom-dropin-service.local"
+    run_fail2ban_config_jail_dropin_file_name: "99-custom-dropin-jail.local"
+
+
+- name: "Molecule | Verify | Uninstall: check the role-managed files are gone"
+  ansible.builtin.stat:
+    path: "{{ item }}"
+  register: __testing_uninstall_gone_stat
+  failed_when:
+    - __testing_uninstall_gone_stat['stat']['exists']
+  loop:
+    - "/etc/fail2ban/fail2ban.d/99-custom-dropin-service.local"
+    - "/etc/fail2ban/jail.d/99-custom-dropin-jail.local"
+    - "/etc/fail2ban/filter.d/renamed-historical.local"
+    - "/usr/bin/fail2ban-server"
+
+
+- name: "Molecule | Verify | Uninstall: check the administrator's file survived"
+  ansible.builtin.stat:
+    path: "/etc/fail2ban/jail.d/98-admin-own.local"
+  register: __testing_uninstall_admin_stat
+  failed_when:
+    - not __testing_uninstall_admin_stat['stat']['exists']
+
+
+- name: "Molecule | Verify | Uninstall: remove the administrator-owned test file"
+  ansible.builtin.file:
+    path: "/etc/fail2ban/jail.d/98-admin-own.local"
+    state: "absent"
