@@ -1,0 +1,9 @@
+---
+
+bugfixes:
+  - >
+    ``run`` role - ``state: absent`` now removes Fail2ban completely on Red
+    Hat platforms. EPEL and Fedora split Fail2ban into a meta package plus
+    subpackages (``fail2ban-server``, ``fail2ban-firewalld``,
+    ``fail2ban-sendmail``); only the meta package was removed, leaving the
+    actual server installed.

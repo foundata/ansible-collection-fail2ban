@@ -22,3 +22,15 @@ __run_fail2ban_packages_install_map_backends:
   #   We handle this instead via `__run_fail2ban_jail_settings_defaults`, which
   #   is more explicit and manageable via role variables
   #   - "fail2ban-systemd"
+
+
+# EPEL and Fedora split Fail2ban into a meta package plus subpackages;
+# removing only the meta package would leave the actual server installed
+# (dnf does not remove no-longer-needed dependencies on its own), so the
+# subpackages are listed for removal explicitly. python3-inotify is
+# deliberately not included: shared Python bindings other software may use.
+__run_fail2ban_packages_uninstall:
+  - "fail2ban"
+  - "fail2ban-server"
+  - "fail2ban-firewalld"
+  - "fail2ban-sendmail"
