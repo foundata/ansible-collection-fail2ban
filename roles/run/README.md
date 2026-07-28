@@ -318,6 +318,11 @@ If a non-default filename is used, any existing
 `<config dir>/fail2ban.d/99-managed.local` from previous Ansible runs
 will be removed automatically to prevent conflicts.
 
+Has to be a plain filename ending in `.conf` or `.local` (Fail2ban ignores
+other suffixes in this directory), starting with an alphanumeric character
+and containing only characters from `A-Za-z0-9._-` (no path separators);
+the role fails during initialization otherwise.
+
 - **Type**: `str`
 - **Required**: No
 - **Default**: `"99-managed.local"`
@@ -421,6 +426,11 @@ extension (cf. `man jail.conf`).
 If a non-default filename is used, any existing
 `<config dir>/jail.d/99-managed.local` from previous Ansible runs
 will be removed automatically to prevent conflicts.
+
+Has to be a plain filename ending in `.conf` or `.local` (Fail2ban ignores
+other suffixes in this directory), starting with an alphanumeric character
+and containing only characters from `A-Za-z0-9._-` (no path separators);
+the role fails during initialization otherwise.
 
 - **Type**: `str`
 - **Required**: No

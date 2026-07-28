@@ -1,0 +1,10 @@
+---
+
+security_fixes:
+  - >
+    ``run`` role - ``run_fail2ban_config_service_dropin_file_name`` and
+    ``run_fail2ban_config_jail_dropin_file_name`` are now validated to be plain
+    filenames ending in ``.conf`` or ``.local``. A value containing path
+    separators (such as ``../jail.conf``) could previously make the role write
+    to or remove files outside of the Fail2ban configuration directories with
+    root privileges, and any other suffix is silently ignored by Fail2ban.

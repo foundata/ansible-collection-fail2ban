@@ -182,3 +182,28 @@
   loop_control:
     loop_var: "__run_fail2ban_name_item"
     label: "{{ __run_fail2ban_name_item['kind'] }}: {{ __run_fail2ban_name_item['key'] }}"
+
+
+# The drop-in filenames get concatenated into paths below the fail2ban.d and
+# jail.d configuration directories. A value containing a path separator or
+# leading dots (such as '../jail.conf') would make the role write to or remove
+# files outside of those directories with root privileges. Fail2ban also only
+# reads files ending in '.conf' or '.local' from these directories (cf.
+# man jail.conf), so any other suffix would silently never be applied.
+- name: "Init | Assert the drop-in filenames are safe basenames ending in '.conf' or '.local'"
+  ansible.builtin.assert:
+    that:
+      - lookup('ansible.builtin.vars', __run_fail2ban_filename_var) is ansible.builtin.match('^[A-Za-z0-9][A-Za-z0-9._-]*\.(conf|local)$')
+    fail_msg: >-
+      '{{ __run_fail2ban_filename_var }}' ({{ lookup('ansible.builtin.vars', __run_fail2ban_filename_var) }})
+      has to be a plain filename ending in '.conf' or '.local', starting with an
+      alphanumeric character and containing only characters from 'A-Za-z0-9._-'
+      (no path separators).
+    success_msg: >-
+      '{{ __run_fail2ban_filename_var }}' is a safe basename.
+  loop:
+    - "run_fail2ban_config_service_dropin_file_name"
+    - "run_fail2ban_config_jail_dropin_file_name"
+  loop_control:
+    loop_var: "__run_fail2ban_filename_var"
+    label: "{{ __run_fail2ban_filename_var }}"
