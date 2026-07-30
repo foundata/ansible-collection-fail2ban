@@ -1,6 +1,147 @@
 ---
 ancestor: null
 releases:
+  1.2.0:
+    changes:
+      bugfixes:
+        - 'The comment written into neutralized distribution config files contained
+          a stray double quote in the Debian hint (``dpkg -S ''<file>''"``), so the
+          suggested command could not be copied and pasted as-is. The quote is removed.
+
+          '
+        - '``run`` role - Documentation: the ``run_fail2ban_custom_filters`` and ``run_fail2ban_custom_actions``
+          descriptions claimed the role creates ``<name>.conf`` files; the role creates
+          ``<name>.local`` files (as the examples already showed), which take precedence
+          over same-named ``.conf`` files per Fail2ban''s configuration order.
+
+          '
+        - '``run`` role - Platform-specific task files are now guaranteed to run before
+          the shared default tasks. The former single include loop did not preserve
+          that order with several platforms in one play: Ansible batches the includes
+          across hosts and the insertion order depends on when results arrive (non-deterministic),
+          so default tasks could run before platform-specific ones. The includes are
+          now two sequential tasks, which is a hard ordering barrier.
+
+          '
+        - '``run`` role - The Red Hat banaction-mismatch warning checked ``ufw.service``
+          (a copy-paste from the Ubuntu tasks) instead of ``firewalld.service``, so
+          on Red Hat-family systems it never fired for an actually-active firewalld.
+          It now checks ``firewalld.service``.
+
+          '
+        - '``run`` role - The configuration validation now compiles every managed
+          custom filter with ``fail2ban-regex`` before the service is restarted. ``fail2ban-client
+          -t`` does not compile ``failregex`` patterns, and the daemon even starts
+          with such a jail half-configured (it ends up without its log files attached
+          and silently monitors nothing while the service reports success), so a broken
+          pattern previously went unnoticed.
+
+          '
+        - '``run`` role - The documentation of the ``unmanaged`` service state falsely
+          claimed the service "will not start at boot". The role leaves the service
+          completely alone in this state: both the running state and the boot (enablement)
+          state stay exactly as they are. The description now documents the real behavior.
+
+          '
+        - '``run`` role - The service restart handler was gated only on ``run_fail2ban_service_state
+          != ''unmanaged''``. With ``run_fail2ban_service_state: "disabled"`` a configuration
+          change still notified them and, because handlers run after the service management
+          tasks, the restart started the just-stopped unit again, leaving a running
+          service although the declared state is stopped. The handlers are now gated
+          on ``run_fail2ban_service_state in [''enabled'', ''running'']``.
+
+          '
+        - '``run`` role - ``run_fail2ban_state: "absent"`` now also removes custom
+          filter and action files created by the role (identified by the ownership
+          marker). They were left behind before.
+
+          '
+        - '``run`` role - ``state: absent`` now removes Fail2ban completely on Red
+          Hat platforms. EPEL and Fedora split Fail2ban into a meta package plus subpackages
+          (``fail2ban-server``, ``fail2ban-firewalld``, ``fail2ban-sendmail``); only
+          the meta package was removed, leaving the actual server installed.
+
+          '
+      known_issues:
+        - '``run`` role - The configuration validation (``fail2ban-client -t``) resolves
+          the configuration tree but does not compile the ``failregex`` patterns,
+          so a syntactically broken regular expression inside a custom filter is not
+          detected by it.
+
+          '
+      minor_changes:
+        - 'The Molecule ``default`` scenario now selects the test backend per platform
+          via a ``type`` key: ``podman`` (container, the default when omitted) or
+          ``libvirt`` (QEMU/KVM virtual machine from a vendor cloud image via a session
+          libvirt daemon, without root privileges). VM platforms allow tests containers
+          cannot cover; commented ``libvirt`` alternates for every platform are included
+          in ``molecule.yml``. ``molecule login`` now works through a per-instance
+          login command for both backends. See ``extensions/molecule/README.md`` for
+          requirements and usage.
+
+          '
+        - '``run`` role - Files created by the role in the shared Fail2ban configuration
+          directories now start with an ownership marker line. Files carrying the
+          marker whose ``run_fail2ban_custom_filters`` or ``run_fail2ban_custom_actions``
+          key was renamed or removed (or whose drop-in filename changed) are now removed
+          automatically; distribution defaults and hand-made files are never touched.
+          Files created by earlier releases do not carry the marker yet: still-declared
+          ones get it on the next run, already orphaned ones must be removed manually
+          once.
+
+          '
+        - '``run`` role - The configuration is now validated with ``fail2ban-client
+          -t`` before the service is restarted. Previously any rendered configuration
+          went straight to a restart, so a jail referencing a filter or action that
+          does not exist, or a malformed drop-in, took the running protection down
+          instead of failing the Ansible run. The daemon now keeps serving its previous
+          configuration when validation fails.
+
+          '
+        - '``run`` role - The keys of ``run_fail2ban_custom_filters`` and ``run_fail2ban_custom_actions``
+          are now checked to be usable as filenames. The basename of such a file is
+          what jails refer to via ``filter = <name>`` or ``action = <name>``, but
+          the keys were silently normalized (lowercased, with every character outside
+          ``a-z0-9._-`` replaced). A key like ``My Filter`` therefore produced ``my_filter.local``,
+          which no jail referring to ``My Filter`` could resolve, and two keys normalizing
+          to the same name overwrote each other. Such keys are now rejected with an
+          explanatory message instead of producing a file that cannot be referenced.
+
+          '
+      release_summary: 'Release Date: 2026-07-30
+
+
+        Maintenance release and bugfix release.
+
+        '
+      security_fixes:
+        - '``run`` role - ``run_fail2ban_config_service_dropin_file_name`` and ``run_fail2ban_config_jail_dropin_file_name``
+          are now validated to be plain filenames ending in ``.conf`` or ``.local``.
+          A value containing path separators (such as ``../jail.conf``) could previously
+          make the role write to or remove files outside of the Fail2ban configuration
+          directories with root privileges, and any other suffix is silently ignored
+          by Fail2ban.
+
+          '
+    fragments:
+      - 1.2.0-release.yaml
+      - assert-usable-filter-action-names.yml
+      - document-unmanaged-service-state.yml
+      - fix-custom-file-extension-docs.yml
+      - fix-el-uninstall-subpackages.yml
+      - fix-handler-service-state-gate.yml
+      - fix-neutralize-comment-text.yml
+      - fix-platform-include-order.yml
+      - fix-redhat-firewalld-warning.yml
+      - molecule-per-platform-test-backend.yaml
+      - reap-stale-managed-files.yml
+      - refactor-lazy-merge.yml
+      - style-fqcn-molecule-shared.yml
+      - style-fqcn.yml
+      - validate-config-before-restart.yml
+      - validate-custom-filter-regex.yml
+      - validate-dropin-filenames.yml
+    release_date: '2026-07-30'
   1.1.0:
     changes:
       minor_changes:
