@@ -1,0 +1,9 @@
+---
+
+bugfixes:
+  - >
+    ``run`` - the cleanup and uninstall sweeps only treat files as role-owned
+    when they contain the ownership marker as an exact line. Previously the
+    marker was matched as a substring (and with regex semantics), so a
+    foreign file merely mentioning the marker text (e.g. quoted in a comment)
+    was deleted.

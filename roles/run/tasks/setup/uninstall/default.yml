@@ -30,7 +30,7 @@
   ansible.builtin.command:
     argv: >-
       {{
-        [__run_fail2ban_grep_exec_path, '-l', '-s', '--', __run_fail2ban_config_file_marker]
+        [__run_fail2ban_grep_exec_path, '-l', '-s', '-x', '-F', '--', __run_fail2ban_config_file_marker]
         + (__run_fail2ban_find_result['files'] | ansible.builtin.map(attribute='path') | ansible.builtin.list)
       }}
   register: __run_fail2ban_owned_result

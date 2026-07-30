@@ -741,12 +741,17 @@
 
 
 # An administrator's own drop-in (no ownership marker): the sweep must leave
-# it alone even though it lives in a managed directory.
+# it alone even though it lives in a managed directory. The content mentions
+# the marker as a substring on purpose: ownership requires the exact marker
+# line, a mere mention (e.g. quoted in a comment) must not get the file
+# deleted.
 - name: "Molecule | Verify | Uninstall: plant an administrator-owned drop-in without the marker"
   ansible.builtin.copy:
     dest: "/etc/fail2ban/jail.d/98-admin-own.local"
     content: |
-      # hand-made by the administrator, not Ansible
+      # hand-made by the administrator, not Ansible. Files containing the
+      # exact "{{ __run_fail2ban_config_file_marker }}" line are role-owned;
+      # this one merely quotes that marker.
       [sshd]
       enabled = false
     owner: "root"
