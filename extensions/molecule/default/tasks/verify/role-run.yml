@@ -33,7 +33,7 @@
     __testing_journalctl_executable: >-
       {{
         '/bin/journalctl'
-        if (ansible_facts['distribution'] == 'Debian' and ansible_facts['distribution_major_version'] | ansible.builtin.int == 11)
+        if ((ansible_facts['distribution'] | ansible.builtin.lower) == 'debian' and ansible_facts['distribution_major_version'] | ansible.builtin.int == 11)
         else '/usr/bin/journalctl'
       }}
 
@@ -637,7 +637,7 @@
         fail_msg: "__run_fail2ban_effective_jail_settings did not include the RedHat-family banaction overwrite."
         success_msg: "__run_fail2ban_effective_jail_settings includes the RedHat-family banaction overwrite."
       when:
-        - ansible_facts['os_family'] == "RedHat"
+        - (ansible_facts['os_family'] | ansible.builtin.lower) == "redhat"
 
 
     - name: "Molecule | Verify | Assert detected backends reflect the merged jail settings"
