@@ -10,6 +10,6 @@
   ansible.builtin.package:
     name:
       - "epel-release"
-    state: "{{ 'latest' if run_fail2ban_autoupgrade else 'present' }}"
+    state: "{{ 'latest' if (run_fail2ban_autoupgrade | ansible.builtin.bool) else 'present' }}"
   when:
     - (ansible_facts['distribution'] | ansible.builtin.regex_replace(' ', '_') | ansible.builtin.lower) != 'fedora'
