@@ -1,6 +1,33 @@
 ---
 ancestor: null
 releases:
+  1.2.1:
+    changes:
+      bugfixes:
+        - '``run`` - the cleanup and uninstall sweeps only treat files as role-owned
+          when they contain the ownership marker as an exact line. Previously the
+          marker was matched as a substring (and with regex semantics), so a foreign
+          file merely mentioning the marker text (e.g. quoted in a comment) was deleted.
+
+          '
+        - 'boolean role arguments are now coerced with ``ansible.builtin.bool`` in
+          every conditional expression. String values, as delivered by ``-e var=false``
+          command line extra-vars, were evaluated by truthiness before, so ``"false"``
+          enabled the gated behavior instead of disabling it.
+
+          '
+      release_summary: 'Release Date: 2026-08-13
+
+
+        Bugfix release.
+
+        '
+    fragments:
+      - 1.2.1-release.yaml
+      - bool-coercion.yml
+      - marker-exact-line.yml
+      - style-fact-normalization.yml
+    release_date: '2026-08-13'
   1.2.0:
     changes:
       bugfixes:

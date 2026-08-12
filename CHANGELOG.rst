@@ -4,6 +4,22 @@ foundata.fail2ban Ansible collection Release Notes
 
 .. contents:: Topics
 
+v1.2.1
+======
+
+Release Summary
+---------------
+
+Release Date: 2026-08-13
+
+Bugfix release.
+
+Bugfixes
+--------
+
+- ``run`` - the cleanup and uninstall sweeps only treat files as role-owned when they contain the ownership marker as an exact line. Previously the marker was matched as a substring (and with regex semantics), so a foreign file merely mentioning the marker text (e.g. quoted in a comment) was deleted.
+- boolean role arguments are now coerced with ``ansible.builtin.bool`` in every conditional expression. String values, as delivered by ``-e var=false`` command line extra-vars, were evaluated by truthiness before, so ``"false"`` enabled the gated behavior instead of disabling it.
+
 v1.2.0
 ======
 
