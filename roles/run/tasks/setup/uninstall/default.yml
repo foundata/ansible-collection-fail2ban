@@ -5,13 +5,15 @@
 # Fixed paths cover files written by releases without the ownership marker.
 - name: "Setup | Uninstall | Remove drop-in configuration files created by the role"
   ansible.builtin.file:
-    path: "{{ item }}"
+    path: "{{ __run_fail2ban_dropin_path_item }}"
     state: "absent"
   loop:
     - "{{ __run_fail2ban_config_service_dropin_file_path }}"
     - "{{ __run_fail2ban_config_jail_dropin_file_path_default }}"
     - "{{ __run_fail2ban_config_service_dropin_file_path_default }}"
     - "{{ __run_fail2ban_config_jail_dropin_file_path }}"
+  loop_control:
+    loop_var: "__run_fail2ban_dropin_path_item"
 
 
 - name: "Setup | Uninstall | Find files in the managed Fail2ban configuration directories"
@@ -43,9 +45,11 @@
 
 - name: "Setup | Uninstall | Remove files created by this role"
   ansible.builtin.file:
-    path: "{{ item }}"
+    path: "{{ __run_fail2ban_created_path_item }}"
     state: "absent"
   loop: "{{ __run_fail2ban_owned_result['stdout_lines'] | ansible.builtin.default([]) }}"
+  loop_control:
+    loop_var: "__run_fail2ban_created_path_item"
 
 
 - name: "Setup | Uninstall | Remove packages"

@@ -105,14 +105,14 @@
   vars:
     __run_fail2ban_loop_file_name: >-
       {{
-        item['key']
+        __run_fail2ban_filter_item['key']
         | ansible.builtin.lower
         | ansible.builtin.regex_replace('[^a-z0-9._-]', '_')
         | ansible.builtin.regex_replace('_+', '_')
         | ansible.builtin.regex_replace('^_|_$', '')
       }}.local
     # Pass (and/or adjust) variables needed for the template
-    tpl_settings: "{{ item['value'] }}"
+    tpl_settings: "{{ __run_fail2ban_filter_item['value'] }}"
   loop: >-
     {{
       run_fail2ban_custom_filters
@@ -120,6 +120,7 @@
       | ansible.builtin.dict2items
     }}
   loop_control:
+    loop_var: "__run_fail2ban_filter_item"
     label: "{{ __run_fail2ban_config_filter_dropin_dir_path }}/{{ __run_fail2ban_loop_file_name }}"
   when:
     - ((run_fail2ban_custom_filters | ansible.builtin.default({})) | ansible.builtin.length) > 0
@@ -152,14 +153,14 @@
   vars:
     __run_fail2ban_loop_file_name: >-
       {{
-        item['key']
+        __run_fail2ban_action_item['key']
         | ansible.builtin.lower
         | ansible.builtin.regex_replace('[^a-z0-9._-]', '_')
         | ansible.builtin.regex_replace('_+', '_')
         | ansible.builtin.regex_replace('^_|_$', '')
       }}.local
     # Pass (and/or adjust) variables needed for the template
-    tpl_settings: "{{ item['value'] }}"
+    tpl_settings: "{{ __run_fail2ban_action_item['value'] }}"
   loop: >-
     {{
       run_fail2ban_custom_actions
@@ -167,6 +168,7 @@
       | ansible.builtin.dict2items
     }}
   loop_control:
+    loop_var: "__run_fail2ban_action_item"
     label: "{{ __run_fail2ban_config_action_dropin_dir_path }}/{{ __run_fail2ban_loop_file_name }}"
   when:
     - ((run_fail2ban_custom_actions | ansible.builtin.default({})) | ansible.builtin.length) > 0
@@ -217,9 +219,11 @@
 
 - name: "Config | Default | Remove stale files created by this role"
   ansible.builtin.file:
-    path: "{{ item }}"
+    path: "{{ __run_fail2ban_stale_path_item }}"
     state: "absent"
   loop: "{{ __run_fail2ban_stale_result['stdout_lines'] | ansible.builtin.default([]) }}"
+  loop_control:
+    loop_var: "__run_fail2ban_stale_path_item"
   notify:
     - "run_fail2ban: validate configuration"
     - "run_fail2ban: restart fail2ban.service"

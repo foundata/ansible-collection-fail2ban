@@ -122,10 +122,12 @@
   ansible.builtin.include_vars:
     file: "{{ __run_fail2ban_vars_file }}"
   vars:
-    __run_fail2ban_vars_file: "{{ role_path }}/vars/{{ item }}"
+    __run_fail2ban_vars_file: "{{ role_path }}/vars/{{ __run_fail2ban_varsfile_item }}"
   when:
     - __run_fail2ban_vars_file is ansible.builtin.file
   loop: "{{ __run_fail2ban_platform_filenames_most_specific_last }}"
+  loop_control:
+    loop_var: "__run_fail2ban_varsfile_item"
 
 
 ### fail2ban specific
@@ -133,15 +135,15 @@
 
 - name: "Init | Show effective merged variables (computed lazily in vars/main.yml)"
   ansible.builtin.debug:
-    msg: "{{ __run_fail2ban_effective_var }} = {{ lookup('ansible.builtin.vars', __run_fail2ban_effective_var) }}"
+    msg: "{{ __run_fail2ban_effective_var_item }} = {{ lookup('ansible.builtin.vars', __run_fail2ban_effective_var_item) }}"
     verbosity: 3
   loop:
     - "__run_fail2ban_effective_service_settings"
     - "__run_fail2ban_effective_jail_settings"
     - "__run_fail2ban_detected_backends"
   loop_control:
-    loop_var: "__run_fail2ban_effective_var"
-    label: "{{ __run_fail2ban_effective_var }}"
+    loop_var: "__run_fail2ban_effective_var_item"
+    label: "{{ __run_fail2ban_effective_var_item }}"
 
 
 # The basename of a custom filter or action file is not cosmetic: it is the name
@@ -193,17 +195,17 @@
 - name: "Init | Assert the drop-in filenames are safe basenames ending in '.conf' or '.local'"
   ansible.builtin.assert:
     that:
-      - lookup('ansible.builtin.vars', __run_fail2ban_filename_var) is ansible.builtin.match('^[A-Za-z0-9][A-Za-z0-9._-]*\.(conf|local)$')
+      - lookup('ansible.builtin.vars', __run_fail2ban_filename_var_item) is ansible.builtin.match('^[A-Za-z0-9][A-Za-z0-9._-]*\.(conf|local)$')
     fail_msg: >-
-      '{{ __run_fail2ban_filename_var }}' ({{ lookup('ansible.builtin.vars', __run_fail2ban_filename_var) }})
+      '{{ __run_fail2ban_filename_var_item }}' ({{ lookup('ansible.builtin.vars', __run_fail2ban_filename_var_item) }})
       has to be a plain filename ending in '.conf' or '.local', starting with an
       alphanumeric character and containing only characters from 'A-Za-z0-9._-'
       (no path separators).
     success_msg: >-
-      '{{ __run_fail2ban_filename_var }}' is a safe basename.
+      '{{ __run_fail2ban_filename_var_item }}' is a safe basename.
   loop:
     - "run_fail2ban_config_service_dropin_file_name"
     - "run_fail2ban_config_jail_dropin_file_name"
   loop_control:
-    loop_var: "__run_fail2ban_filename_var"
-    label: "{{ __run_fail2ban_filename_var }}"
+    loop_var: "__run_fail2ban_filename_var_item"
+    label: "{{ __run_fail2ban_filename_var_item }}"

@@ -22,7 +22,7 @@
 
 - name: "Setup | Install | Default | Install backend-specific packages"
   ansible.builtin.package:
-    name: "{{ __run_fail2ban_packages_install_map_backends[item] }}"
+    name: "{{ __run_fail2ban_packages_install_map_backends[__run_fail2ban_backend_item] }}"
     state: "{{ 'latest' if (run_fail2ban_autoupgrade | ansible.builtin.bool) else 'present' }}"
   loop: >-
     {{
@@ -31,41 +31,45 @@
       | ansible.builtin.select('ansible.builtin.in', __run_fail2ban_packages_install_map_backends.keys() | ansible.builtin.list)
       | ansible.builtin.list
     }}
+  loop_control:
+    loop_var: "__run_fail2ban_backend_item"
   when:
     - (__run_fail2ban_detected_backends | ansible.builtin.default([]) | ansible.builtin.length) > 0
 
 
 - name: "Setup | Install | Default | Remove unwanted files and directories (e.g., to prevent conflicts or resolve incompatibilities)"
   ansible.builtin.file:
-    path: "{{ item }}"
+    path: "{{ __run_fail2ban_removal_path_item }}"
     state: "absent"
   when:
     - __run_fail2ban_paths_removal is ansible.builtin.defined
     - (__run_fail2ban_paths_removal | ansible.builtin.length) > 0
   loop: "{{ __run_fail2ban_paths_removal }}"
+  loop_control:
+    loop_var: "__run_fail2ban_removal_path_item"
 
 
 - name: "Setup | Install | Default | Neutralize distribution config files (overwrite to survive package updates)"
   ansible.builtin.copy:
-    dest: "{{ item['key'] }}"
+    dest: "{{ __run_fail2ban_neutralize_item['key'] }}"
     content: |
-      {{ item['value'] }} Managed by Ansible (foundata.fail2ban.run)
-      {{ item['value'] }}
-      {{ item['value'] }} Content intentionally cleared. The original distribution file conflicted
-      {{ item['value'] }} with configuration managed by the foundata.fail2ban.run role.
-      {{ item['value'] }}
-      {{ item['value'] }} To restore the original file content, reinstall the owning package:
+      {{ __run_fail2ban_neutralize_item['value'] }} Managed by Ansible (foundata.fail2ban.run)
+      {{ __run_fail2ban_neutralize_item['value'] }}
+      {{ __run_fail2ban_neutralize_item['value'] }} Content intentionally cleared. The original distribution file conflicted
+      {{ __run_fail2ban_neutralize_item['value'] }} with configuration managed by the foundata.fail2ban.run role.
+      {{ __run_fail2ban_neutralize_item['value'] }}
+      {{ __run_fail2ban_neutralize_item['value'] }} To restore the original file content, reinstall the owning package:
       {% if (ansible_facts['os_family'] | ansible.builtin.lower) == 'debian' %}
-      {{ item['value'] }}   dpkg -S '{{ item['key'] }}'  # find the package that owns this file
-      {{ item['value'] }}   apt-get install --reinstall <package>  # reinstall it to restore the original
+      {{ __run_fail2ban_neutralize_item['value'] }}   dpkg -S '{{ __run_fail2ban_neutralize_item['key'] }}'  # find the package that owns this file
+      {{ __run_fail2ban_neutralize_item['value'] }}   apt-get install --reinstall <package>  # reinstall it to restore the original
       {% elif (ansible_facts['os_family'] | ansible.builtin.lower) == 'suse' %}
-      {{ item['value'] }}   rpm -qf '{{ item['key'] }}'  # find the package that owns this file
-      {{ item['value'] }}   zypper install --force <package>  # reinstall it to restore the original
+      {{ __run_fail2ban_neutralize_item['value'] }}   rpm -qf '{{ __run_fail2ban_neutralize_item['key'] }}'  # find the package that owns this file
+      {{ __run_fail2ban_neutralize_item['value'] }}   zypper install --force <package>  # reinstall it to restore the original
       {% elif (ansible_facts['os_family'] | ansible.builtin.lower) == 'redhat' %}
-      {{ item['value'] }}   rpm -qf '{{ item['key'] }}'  # find the package that owns this file
-      {{ item['value'] }}   dnf reinstall <package>  # reinstall it to restore the original
+      {{ __run_fail2ban_neutralize_item['value'] }}   rpm -qf '{{ __run_fail2ban_neutralize_item['key'] }}'  # find the package that owns this file
+      {{ __run_fail2ban_neutralize_item['value'] }}   dnf reinstall <package>  # reinstall it to restore the original
       {% else %}
-      {{ item['value'] }}   Use your package manager to find the owning package and reinstall it.
+      {{ __run_fail2ban_neutralize_item['value'] }}   Use your package manager to find the owning package and reinstall it.
       {% endif %}
     owner: "root"
     group: "root"
@@ -75,4 +79,5 @@
     - (__run_fail2ban_paths_neutralize | ansible.builtin.length) > 0
   loop: "{{ __run_fail2ban_paths_neutralize | ansible.builtin.dict2items }}"
   loop_control:
-    label: "{{ item['key'] }}"
+    loop_var: "__run_fail2ban_neutralize_item"
+    label: "{{ __run_fail2ban_neutralize_item['key'] }}"

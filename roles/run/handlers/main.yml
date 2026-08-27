@@ -37,12 +37,13 @@
     argv:
       - "{{ __run_fail2ban_regex_exec_path }}"
       - "/dev/null"
-      - "{{ __run_fail2ban_config_filter_dropin_dir_path }}/{{ item }}.local"
+      - "{{ __run_fail2ban_config_filter_dropin_dir_path }}/{{ __run_fail2ban_filter_name_item }}.local"
   changed_when:
     - false
   loop: "{{ (run_fail2ban_custom_filters | ansible.builtin.default({})).keys() | ansible.builtin.list }}"
   loop_control:
-    label: "{{ item }}.local"
+    loop_var: "__run_fail2ban_filter_name_item"
+    label: "{{ __run_fail2ban_filter_name_item }}.local"
   listen:
     - "run_fail2ban: validate configuration"
 
