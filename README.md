@@ -105,8 +105,6 @@ Third-party trademarks used in this repository:
   the United States and other countries.
 - Debian® is a trademark of Software in the Public Interest, Inc., registered in
   Germany and the United States.
-- Docker® is a trademark of Docker, Inc., registered in the European Union and
-  the United States.
 - openSUSE® is a trademark of SUSE LLC or its affiliates, registered in the
   European Union and the United States.
 - Ubuntu® is a trademark of Canonical Ltd., registered in Germany, the European
