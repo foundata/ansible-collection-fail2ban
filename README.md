@@ -1,5 +1,10 @@
 # Ansible collection: `foundata.fail2ban`
 
+<!--
+SPDX-FileCopyrightText: foundata GmbH <https://foundata.com>
+SPDX-License-Identifier: GPL-3.0-or-later
+-->
+
 This repository contains the `foundata.fail2ban` Ansible Collection. It provides
 resources to manage [fail2ban](https://github.com/fail2ban/fail2ban), a daemon
 to ban hosts that cause multiple authentication errors.

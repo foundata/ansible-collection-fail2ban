@@ -1,5 +1,10 @@
 # Ansible role: `foundata.fail2ban.run`
 
+<!--
+SPDX-FileCopyrightText: foundata GmbH <https://foundata.com>
+SPDX-License-Identifier: GPL-3.0-or-later
+-->
+
 The `foundata.fail2ban.run` Ansible role (part of the `foundata.fail2ban` Ansible collection). It provides automated management of [fail2ban](https://github.com/fail2ban/fail2ban) configuration and service state.
 
 
