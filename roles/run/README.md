@@ -162,19 +162,21 @@ There are also tags that are generally not intended to be called directly but ar
 
 Main entry point for the foundata.fail2ban.run role
 
+Manage the Fail2Ban intrusion prevention system
+
 The following variables can be configured for this role:
 
-| Variable | Type | Required | Default | Description (abstract) |
-|----------|------|----------|---------|------------------------|
-| `run_fail2ban_state` | `str` | No | `"present"` | Determines whether the managed resources should be `present` or `absent`.<br><br>`present` ensures that required components, such as software packages, are installed and configured.<br><br>`absent` reverts changes as much as possible, such as […](#variable-run_fail2ban_state) |
-| `run_fail2ban_autoupgrade` | `bool` | No | `false` | If set to `true`, all managed packages will be upgraded during each Ansible run (e.g., when the package provider detects a newer version than the currently installed one). |
-| `run_fail2ban_service_state` | `str` | No | `"enabled"` | Defines the status of the service(s).<br><br>`enabled`: Service is running and will start automatically at boot.<br><br>`disabled`: Service is stopped and will not start automatically at boot.<br><br>`running` Service is running but will not start […](#variable-run_fail2ban_service_state) |
-| `run_fail2ban_service_settings` | `dict` | No | `{}` | Fail2ban service configuration values.<br><br>These settings are placed in a drop-in configuration file in `/fail2ban.d`. They take highest priority, overriding internal defaults (see `__run_fail2ban_service_settings_defaults` in `vars/main.yml`) and […](#variable-run_fail2ban_service_settings) |
-| `run_fail2ban_config_service_dropin_file_name` | `str` | No | `"99-managed.local"` | Filename of the drop-in configuration file to be placed in `/fail2ban.d`. Defaults to `99-managed.local`. The `99-` prefix in combination with the `.local` extension ensures later loading and thus higher precedence over files with lower-numbered […](#variable-run_fail2ban_config_service_dropin_file_name) |
-| `run_fail2ban_jail_settings` | `dict` | No | `{}` | Fail2ban jail configuration values.<br><br>These settings are placed in a drop-in configuration file in `/jail.d`. They take highest priority, overriding internal defaults (see `__run_fail2ban_jail_settings_defaults` in `vars/main.yml`) and […](#variable-run_fail2ban_jail_settings) |
-| `run_fail2ban_config_jail_dropin_file_name` | `str` | No | `"99-managed.local"` | Filename of the drop-in configuration file to be placed in `/jail.d`. Defaults to `99-managed.local`. The `99-` prefix in combination with the `.local` extension ensures later loading and thus higher precedence over files with lower-numbered prefixes […](#variable-run_fail2ban_config_jail_dropin_file_name) |
-| `run_fail2ban_custom_filters` | `dict` | No | `{}` | Custom filter definitions to be placed in `/filter.d/`. Filters define the regex patterns used to detect intrusion attempts in log files.<br><br>Use filter names as top-level YAML keys (will create `filter.d/.local`) Use section names as 2nd-level […](#variable-run_fail2ban_custom_filters) |
-| `run_fail2ban_custom_actions` | `dict` | No | `{}` | Custom action definitions to be placed in `/action.d/`. Actions define what happens when an IP is banned or unbanned (e.g., firewall rules, notifications).<br><br>Use action names as top-level YAML keys (will create `action.d/.local`) Use section […](#variable-run_fail2ban_custom_actions) |
+|                    Variable                    |  Type  | Required |       Default        | Description (abstract) |
+| ---------------------------------------------- | ------ | -------- | -------------------- | ---------------------- |
+| `run_fail2ban_state`                           | `str`  | No       | `"present"`          | Determines whether the managed resources should be `present` or `absent`.<br><br>`present` ensures that required components, such as software packages, are installed and configured.<br><br>`absent` reverts changes as much as possible, such as […](#variable-run_fail2ban_state) |
+| `run_fail2ban_autoupgrade`                     | `bool` | No       | `false`              | If set to `true`, all managed packages will be upgraded during each Ansible run (e.g., when the package provider detects a newer version than the currently installed one). |
+| `run_fail2ban_service_state`                   | `str`  | No       | `"enabled"`          | Defines the status of the service(s).<br><br>`enabled`: Service is running and will start automatically at boot.<br><br>`disabled`: Service is stopped and will not start automatically at boot.<br><br>`running` Service is running but will not start […](#variable-run_fail2ban_service_state) |
+| `run_fail2ban_service_settings`                | `dict` | No       | `{}`                 | Fail2ban service configuration values.<br><br>These settings are placed in a drop-in configuration file in `/fail2ban.d`. They take highest priority, overriding internal defaults (see `__run_fail2ban_service_settings_defaults` in `vars/main.yml`) and […](#variable-run_fail2ban_service_settings) |
+| `run_fail2ban_config_service_dropin_file_name` | `str`  | No       | `"99-managed.local"` | Filename of the drop-in configuration file to be placed in `/fail2ban.d`. Defaults to `99-managed.local`. The `99-` prefix in combination with the `.local` extension ensures later loading and thus higher precedence over files with lower-numbered […](#variable-run_fail2ban_config_service_dropin_file_name) |
+| `run_fail2ban_jail_settings`                   | `dict` | No       | `{}`                 | Fail2ban jail configuration values.<br><br>These settings are placed in a drop-in configuration file in `/jail.d`. They take highest priority, overriding internal defaults (see `__run_fail2ban_jail_settings_defaults` in `vars/main.yml`) and […](#variable-run_fail2ban_jail_settings) |
+| `run_fail2ban_config_jail_dropin_file_name`    | `str`  | No       | `"99-managed.local"` | Filename of the drop-in configuration file to be placed in `/jail.d`. Defaults to `99-managed.local`. The `99-` prefix in combination with the `.local` extension ensures later loading and thus higher precedence over files with lower-numbered prefixes […](#variable-run_fail2ban_config_jail_dropin_file_name) |
+| `run_fail2ban_custom_filters`                  | `dict` | No       | `{}`                 | Custom filter definitions to be placed in `/filter.d/`. Filters define the regex patterns used to detect intrusion attempts in log files.<br><br>Use filter names as top-level YAML keys (will create `filter.d/.local`) Use section names as 2nd-level […](#variable-run_fail2ban_custom_filters) |
+| `run_fail2ban_custom_actions`                  | `dict` | No       | `{}`                 | Custom action definitions to be placed in `/action.d/`. Actions define what happens when an IP is banned or unbanned (e.g., firewall rules, notifications).<br><br>Use action names as top-level YAML keys (will create `action.d/.local`) Use section […](#variable-run_fail2ban_custom_actions) |
 
 ### `run_fail2ban_state`<a id="variable-run_fail2ban_state"></a>
 
@@ -264,11 +266,13 @@ Special cases:
   by the role as needed).
 - For multiline values, use normal YAML block scalars (`|`). The role will
   automatically handle indentation:
-  ```
+
+  ```text
   logpath: |
     /var/log/auth.log
     /var/log/secure
   ```
+
 - Settings in Fail2ban's `DEFAULT` section are getting applied to all parts
   of the configuration unless overridden in individual section definitions.
 
@@ -296,8 +300,8 @@ stacksize = 0
 The official documentation provides general configuration guidance:
 
 - [`man fail2ban`](https://manpages.debian.org/testing/fail2ban/fail2ban.1.en.html)
-- https://github.com/fail2ban/fail2ban/wiki/Best-practice
-- https://github.com/fail2ban/fail2ban/wiki/Proper-fail2ban-configuration
+- <https://github.com/fail2ban/fail2ban/wiki/Best-practice>
+- <https://github.com/fail2ban/fail2ban/wiki/Proper-fail2ban-configuration>
 
 The unmodified default configuration is already a good starting point and
 usually doesn't require changes when using common services like SSH or NGINX.
@@ -360,11 +364,13 @@ Special cases:
   by the role as needed).
 - For multiline values, use normal YAML block scalars (`|`). The role will
   automatically handle indentation:
-  ```
+
+  ```text
   logpath: |
     /var/log/auth.log
     /var/log/secure
   ```
+
 - Settings in Fail2ban's `DEFAULT` section are getting applied to all jails
   unless overridden in individual jail definitions.
 
@@ -406,7 +412,7 @@ The official documentation provides general configuration guidance:
 
 - [`man jail.conf`](https://manpages.debian.org/testing/fail2ban/jail.conf.5.en.html)
 - [`man fail2ban-regex`](https://manpages.debian.org/testing/fail2ban/fail2ban-regex.1.en.html)
-- https://github.com/fail2ban/fail2ban/wiki/Best-practice
+- <https://github.com/fail2ban/fail2ban/wiki/Best-practice>
 
 The unmodified default configuration is already a good starting point and
 usually doesn't require changes when using common services like SSH or NGINX
@@ -467,6 +473,7 @@ Special cases:
 - There is a `content` key, allowing you to put raw lines for the filter as
   the value without any special treatment. This is useful if you already have
   existing filters and do not want to convert their definitions into YAML:
+
   ```yaml
   my-complex-filter:
     content: |
@@ -474,6 +481,7 @@ Special cases:
       failregex = ^<HOST> - .*$
       [...]
   ```
+
 Example:
 
 ```yaml
@@ -503,7 +511,7 @@ The official documentation provides general configuration guidance:
 
 - [`man jail.conf`](https://manpages.debian.org/testing/fail2ban/jail.conf.5.en.html)
 - [`man fail2ban-regex`](https://manpages.debian.org/testing/fail2ban/fail2ban-regex.1.en.html)
-- https://github.com/fail2ban/fail2ban/wiki/Best-practice
+- <https://github.com/fail2ban/fail2ban/wiki/Best-practice>
 
 Most users do not need custom filter as fail2ban ships with filters for common
 services like SSH or NGINX. If empty dict (default), no custom filters are
@@ -540,9 +548,10 @@ Special cases:
 
 - For boolean values, use `true`/`false` (these will be converted to strings
   by the role as needed).
-- There is a `content` key, allowing you to put raw lines for the action as
-  the value without any special treatment. This is useful if you already have
+- There is a `content` key, allowing you to put raw lines for the action as the
+  value without any special treatment. This is useful if you already have
   existing action and do not want to convert their definitions into YAML:
+
   ```yaml
   my-complex-notify-slack:
     content: |
@@ -578,7 +587,7 @@ actionunban = curl -X POST -H 'Content-type: application/json' --data '{"text":"
 The official documentation provides general configuration guidance:
 
 - [`man jail.conf`](https://manpages.debian.org/testing/fail2ban/jail.conf.5.en.html)
-- https://github.com/fail2ban/fail2ban/wiki/Best-practice
+- <https://github.com/fail2ban/fail2ban/wiki/Best-practice>
 
 Most users do not need custom actions as fail2ban ships with actions for
 common firewall backends. If empty dict (default), no custom actions are
@@ -591,7 +600,6 @@ Distribution defaults and hand-made files are never touched.
 - **Type**: `dict`
 - **Required**: No
 - **Default**: `{}`
-
 
 
 
