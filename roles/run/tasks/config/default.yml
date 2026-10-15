@@ -4,7 +4,6 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 ---
-
 ## Service
 
 - name: "Config | Default | Ensure drop-in service config directory exists with proper permissions"
@@ -15,9 +14,8 @@
     group: "{{ __run_fail2ban_config_service_dropin_dir_group }}"
     mode: "{{ __run_fail2ban_config_service_dropin_dir_mode }}"
   notify:
-    - "run_fail2ban: validate configuration"
-    - "run_fail2ban: restart fail2ban.service"
-
+    - "run_fail2ban_validate_configuration"
+    - "run_fail2ban_restart_fail2ban"
 
 - name: "Config | Default | Create drop-in service config file"
   ansible.builtin.template:
@@ -29,10 +27,11 @@
   vars:
     # Pass (and/or adjust) variables needed for the template
     tpl_settings: "{{ __run_fail2ban_effective_service_settings }}"
+    tpl_config_file_marker: "{{ __run_fail2ban_config_file_marker }}"
+    tpl_managed: "{{ ansible_managed }}"
   notify:
-    - "run_fail2ban: validate configuration"
-    - "run_fail2ban: restart fail2ban.service"
-
+    - "run_fail2ban_validate_configuration"
+    - "run_fail2ban_restart_fail2ban"
 
 - name: "Config | Default | Remove role's default service drop-in config file (if custom filename is used)"
   ansible.builtin.file:
@@ -41,8 +40,8 @@
   when:
     - __run_fail2ban_config_service_dropin_file_path != __run_fail2ban_config_service_dropin_file_path_default
   notify:
-    - "run_fail2ban: validate configuration"
-    - "run_fail2ban: restart fail2ban.service"
+    - "run_fail2ban_validate_configuration"
+    - "run_fail2ban_restart_fail2ban"
 
 ## Jails
 
@@ -54,9 +53,8 @@
     group: "{{ __run_fail2ban_config_jail_dropin_dir_group }}"
     mode: "{{ __run_fail2ban_config_jail_dropin_dir_mode }}"
   notify:
-    - "run_fail2ban: validate configuration"
-    - "run_fail2ban: restart fail2ban.service"
-
+    - "run_fail2ban_validate_configuration"
+    - "run_fail2ban_restart_fail2ban"
 
 - name: "Config | Default | Create drop-in jail config file"
   ansible.builtin.template:
@@ -68,10 +66,11 @@
   vars:
     # Pass (and/or adjust) variables needed for the template
     tpl_settings: "{{ __run_fail2ban_effective_jail_settings }}"
+    tpl_config_file_marker: "{{ __run_fail2ban_config_file_marker }}"
+    tpl_managed: "{{ ansible_managed }}"
   notify:
-    - "run_fail2ban: validate configuration"
-    - "run_fail2ban: restart fail2ban.service"
-
+    - "run_fail2ban_validate_configuration"
+    - "run_fail2ban_restart_fail2ban"
 
 - name: "Config | Default | Remove role's default jail drop-in config file (if custom filename is used)"
   ansible.builtin.file:
@@ -80,9 +79,8 @@
   when:
     - __run_fail2ban_config_jail_dropin_file_path != __run_fail2ban_config_jail_dropin_file_path_default
   notify:
-    - "run_fail2ban: validate configuration"
-    - "run_fail2ban: restart fail2ban.service"
-
+    - "run_fail2ban_validate_configuration"
+    - "run_fail2ban_restart_fail2ban"
 
 ## Custom filter file(s)
 
@@ -94,9 +92,8 @@
     group: "{{ __run_fail2ban_config_filter_dropin_dir_group }}"
     mode: "{{ __run_fail2ban_config_filter_dropin_dir_mode }}"
   notify:
-    - "run_fail2ban: validate configuration"
-    - "run_fail2ban: restart fail2ban.service"
-
+    - "run_fail2ban_validate_configuration"
+    - "run_fail2ban_restart_fail2ban"
 
 - name: "Config | Default | Create filter config files"
   ansible.builtin.template:
@@ -116,6 +113,10 @@
       }}.local
     # Pass (and/or adjust) variables needed for the template
     tpl_settings: "{{ __run_fail2ban_filter_item['value'] }}"
+    tpl_config_file_marker: "{{ __run_fail2ban_config_file_marker }}"
+    tpl_managed: "{{ ansible_managed }}"
+  when:
+    - ((run_fail2ban_custom_filters | ansible.builtin.default({})) | ansible.builtin.length) > 0
   loop: >-
     {{
       run_fail2ban_custom_filters
@@ -125,12 +126,9 @@
   loop_control:
     loop_var: "__run_fail2ban_filter_item"
     label: "{{ __run_fail2ban_config_filter_dropin_dir_path }}/{{ __run_fail2ban_loop_file_name }}"
-  when:
-    - ((run_fail2ban_custom_filters | ansible.builtin.default({})) | ansible.builtin.length) > 0
   notify:
-    - "run_fail2ban: validate configuration"
-    - "run_fail2ban: restart fail2ban.service"
-
+    - "run_fail2ban_validate_configuration"
+    - "run_fail2ban_restart_fail2ban"
 
 ## Custom action file(s)
 
@@ -142,9 +140,8 @@
     group: "{{ __run_fail2ban_config_action_dropin_dir_group }}"
     mode: "{{ __run_fail2ban_config_action_dropin_dir_mode }}"
   notify:
-    - "run_fail2ban: validate configuration"
-    - "run_fail2ban: restart fail2ban.service"
-
+    - "run_fail2ban_validate_configuration"
+    - "run_fail2ban_restart_fail2ban"
 
 - name: "Config | Default | Create action config files"
   ansible.builtin.template:
@@ -164,6 +161,10 @@
       }}.local
     # Pass (and/or adjust) variables needed for the template
     tpl_settings: "{{ __run_fail2ban_action_item['value'] }}"
+    tpl_config_file_marker: "{{ __run_fail2ban_config_file_marker }}"
+    tpl_managed: "{{ ansible_managed }}"
+  when:
+    - ((run_fail2ban_custom_actions | ansible.builtin.default({})) | ansible.builtin.length) > 0
   loop: >-
     {{
       run_fail2ban_custom_actions
@@ -173,12 +174,9 @@
   loop_control:
     loop_var: "__run_fail2ban_action_item"
     label: "{{ __run_fail2ban_config_action_dropin_dir_path }}/{{ __run_fail2ban_loop_file_name }}"
-  when:
-    - ((run_fail2ban_custom_actions | ansible.builtin.default({})) | ansible.builtin.length) > 0
   notify:
-    - "run_fail2ban: validate configuration"
-    - "run_fail2ban: restart fail2ban.service"
-
+    - "run_fail2ban_validate_configuration"
+    - "run_fail2ban_restart_fail2ban"
 
 ## Cleanup: reap files this role created for keys or filenames that were
 ## renamed or removed. Ownership is proven by the marker line the template
@@ -196,7 +194,6 @@
     hidden: true
   register: __run_fail2ban_find_result
 
-
 - name: "Config | Default | Determine stale files created by this role"
   ansible.builtin.command:
     argv: >-
@@ -204,10 +201,6 @@
         [__run_fail2ban_grep_exec_path, '-l', '-s', '-x', '-F', '--', __run_fail2ban_config_file_marker]
         + __run_fail2ban_stale_candidates
       }}
-  register: __run_fail2ban_stale_result
-  changed_when: false
-  failed_when:
-    - __run_fail2ban_stale_result['rc'] not in [0, 1, 2]
   vars:
     __run_fail2ban_stale_candidates: >-
       {{
@@ -219,7 +212,11 @@
   when:
     - (__run_fail2ban_stale_candidates | ansible.builtin.length) > 0
 
-
+  changed_when:
+    - false
+  failed_when:
+    - __run_fail2ban_stale_result['rc'] not in [0, 1, 2]
+  register: __run_fail2ban_stale_result
 - name: "Config | Default | Remove stale files created by this role"
   ansible.builtin.file:
     path: "{{ __run_fail2ban_stale_path_item }}"
@@ -228,5 +225,5 @@
   loop_control:
     loop_var: "__run_fail2ban_stale_path_item"
   notify:
-    - "run_fail2ban: validate configuration"
-    - "run_fail2ban: restart fail2ban.service"
+    - "run_fail2ban_validate_configuration"
+    - "run_fail2ban_restart_fail2ban"

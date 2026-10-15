@@ -8,7 +8,6 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 ---
-
 - name: "Config | Red Hat | Gather service facts"
   ansible.builtin.service_facts:
 
@@ -23,6 +22,7 @@
       does not start with 'firewallcmd'. Consider using firewalld-based ban actions
       (e.g. 'firewallcmd-rich-rules', 'firewallcmd-allports') to avoid mixing firewall
       rule ownership.
+    verbosity: 0
   when:
     - ansible_facts['services']['firewalld.service'] is ansible.builtin.defined
     - ansible_facts['services']['firewalld.service']['state'] is ansible.builtin.defined

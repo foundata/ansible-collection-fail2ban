@@ -4,7 +4,6 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 ---
-
 - name: "Setup | Install | Default | Remove unwanted packages (e.g., to prevent conflicts or resolve incompatibilities)"
   ansible.builtin.package:
     name: "{{ __run_fail2ban_packages_removal }}"
@@ -12,7 +11,6 @@
   when:
     - __run_fail2ban_packages_removal is ansible.builtin.defined
     - (__run_fail2ban_packages_removal | ansible.builtin.length) > 0
-
 
 - name: "Setup | Install | Default | Install or upgrade packages"
   ansible.builtin.package:
@@ -22,11 +20,13 @@
     - __run_fail2ban_packages_install is ansible.builtin.defined
     - (__run_fail2ban_packages_install | ansible.builtin.length) > 0
 
-
 - name: "Setup | Install | Default | Install backend-specific packages"
   ansible.builtin.package:
     name: "{{ __run_fail2ban_packages_install_map_backends[__run_fail2ban_backend_item] }}"
     state: "{{ 'latest' if (run_fail2ban_autoupgrade | ansible.builtin.bool) else 'present' }}"
+  when:
+    - (__run_fail2ban_detected_backends | ansible.builtin.default([]) | ansible.builtin.length) > 0
+
   loop: >-
     {{
       __run_fail2ban_detected_backends
@@ -36,10 +36,6 @@
     }}
   loop_control:
     loop_var: "__run_fail2ban_backend_item"
-  when:
-    - (__run_fail2ban_detected_backends | ansible.builtin.default([]) | ansible.builtin.length) > 0
-
-
 - name: "Setup | Install | Default | Remove unwanted files and directories (e.g., to prevent conflicts or resolve incompatibilities)"
   ansible.builtin.file:
     path: "{{ __run_fail2ban_removal_path_item }}"
@@ -50,7 +46,6 @@
   loop: "{{ __run_fail2ban_paths_removal }}"
   loop_control:
     loop_var: "__run_fail2ban_removal_path_item"
-
 
 - name: "Setup | Install | Default | Neutralize distribution config files (overwrite to survive package updates)"
   ansible.builtin.copy:

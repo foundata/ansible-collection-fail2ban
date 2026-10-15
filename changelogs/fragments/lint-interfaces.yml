@@ -1,0 +1,11 @@
+---
+minor_changes:
+  - >-
+    Add role-prefixed handler topics and use them for internal notifications.
+    Retain the previous topics as migration aliases until version 2.0.0.
+  - >-
+    Add the handler topic run_fail2ban_validate_configuration
+    as the replacement for "run_fail2ban: validate configuration".
+  - >-
+    Add the handler topic run_fail2ban_restart_fail2ban
+    as the replacement for "run_fail2ban: restart fail2ban.service".

@@ -4,7 +4,6 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 ---
-
 # Defined before the restart handler on purpose: handlers run in the order they
 # are defined here, not in the order they are notified, so a broken
 # configuration fails the run while the daemon keeps serving its previous one.
@@ -19,22 +18,15 @@
     argv:
       - "{{ __run_fail2ban_client_exec_path }}"
       - "-t"
-  register: __run_fail2ban_validation_result
   changed_when:
     - false
   failed_when:
     - __run_fail2ban_validation_result is ansible.builtin.failed
+  register: __run_fail2ban_validation_result
   listen:
+    - "run_fail2ban_validate_configuration"
+    # Migration alias; remove in 2.0.0.
     - "run_fail2ban: validate configuration"
-
-
-# "fail2ban-client -t" does not compile the failregex/ignoreregex patterns
-# (see above), and the daemon even starts with a half-configured jail when a
-# pattern is broken: the jail's setup stream aborts at the broken pattern, so
-# it ends up without its log files and silently monitors nothing while
-# fail2ban.service reports success. Compile every managed custom filter
-# explicitly (against an empty log) so a broken pattern fails the run here,
-# while the daemon keeps serving its previous configuration.
 - name: "Handlers | Validate the managed custom filters (regex compilation)"
   ansible.builtin.command:
     argv:
@@ -48,9 +40,9 @@
     loop_var: "__run_fail2ban_filter_name_item"
     label: "{{ __run_fail2ban_filter_name_item }}.local"
   listen:
+    - "run_fail2ban_validate_configuration"
+    # Migration alias; remove in 2.0.0.
     - "run_fail2ban: validate configuration"
-
-
 - name: "Handlers | fail2ban.service restart"
   ansible.builtin.systemd_service:
     name: "{{ __run_fail2ban_fail2ban_servicename }}"
@@ -58,4 +50,6 @@
   when:
     - run_fail2ban_service_state in ['enabled', 'running']
   listen:
+    - "run_fail2ban_restart_fail2ban"
+    # Migration alias; remove in 2.0.0.
     - "run_fail2ban: restart fail2ban.service"

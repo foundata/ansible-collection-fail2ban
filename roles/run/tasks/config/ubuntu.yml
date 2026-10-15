@@ -8,7 +8,6 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 ---
-
 - name: "Config | Ubuntu | Gather service facts"
   ansible.builtin.service_facts:
 
@@ -22,6 +21,7 @@
       ('{{ __run_fail2ban_effective_jail_settings['DEFAULT']['banaction_allports'] | ansible.builtin.default('') }}')
       does not start with 'ufw'. Consider using ufw-based ban actions (e.g. 'ufw') to
       avoid mixing firewall rule ownership.
+    verbosity: 0
   when:
     - ansible_facts['services']['ufw.service'] is ansible.builtin.defined
     - ansible_facts['services']['ufw.service']['state'] is ansible.builtin.defined

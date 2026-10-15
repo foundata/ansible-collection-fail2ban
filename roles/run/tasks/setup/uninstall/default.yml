@@ -4,7 +4,6 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 ---
-
 # Fixed paths cover files written by releases without the ownership marker.
 - name: "Setup | Uninstall | Remove drop-in configuration files created by the role"
   ansible.builtin.file:
@@ -18,7 +17,6 @@
   loop_control:
     loop_var: "__run_fail2ban_dropin_path_item"
 
-
 - name: "Setup | Uninstall | Find files in the managed Fail2ban configuration directories"
   ansible.builtin.find:
     paths:
@@ -30,7 +28,6 @@
     hidden: true
   register: __run_fail2ban_find_result
 
-
 - name: "Setup | Uninstall | Determine files created by this role (ownership marker)"
   ansible.builtin.command:
     argv: >-
@@ -38,14 +35,14 @@
         [__run_fail2ban_grep_exec_path, '-l', '-s', '-x', '-F', '--', __run_fail2ban_config_file_marker]
         + (__run_fail2ban_find_result['files'] | ansible.builtin.map(attribute='path') | ansible.builtin.list)
       }}
-  register: __run_fail2ban_owned_result
-  changed_when: false
-  failed_when:
-    - __run_fail2ban_owned_result['rc'] not in [0, 1, 2]
   when:
     - (__run_fail2ban_find_result['files'] | ansible.builtin.length) > 0
 
-
+  changed_when:
+    - false
+  failed_when:
+    - __run_fail2ban_owned_result['rc'] not in [0, 1, 2]
+  register: __run_fail2ban_owned_result
 - name: "Setup | Uninstall | Remove files created by this role"
   ansible.builtin.file:
     path: "{{ __run_fail2ban_created_path_item }}"
@@ -53,7 +50,6 @@
   loop: "{{ __run_fail2ban_owned_result['stdout_lines'] | ansible.builtin.default([]) }}"
   loop_control:
     loop_var: "__run_fail2ban_created_path_item"
-
 
 - name: "Setup | Uninstall | Remove packages"
   ansible.builtin.package:
