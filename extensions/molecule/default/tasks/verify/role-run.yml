@@ -1,3 +1,4 @@
+---
 # Check collection role "run" outcomes.
 #
 # SPDX-FileCopyrightText: foundata GmbH <https://foundata.com>
@@ -48,7 +49,6 @@
     path: "{{ __run_fail2ban_config_service_dropin_file_path }}"
   register: __testing_dropin_file
 
-
 - name: "Molecule | Verify | Assert fail2ban service drop-in configuration file exists"
   ansible.builtin.assert:
     that:
@@ -68,7 +68,6 @@
     - __run_fail2ban_config_service_dropin_file_path != __run_fail2ban_config_service_dropin_file_path_default
   register: __testing_dropin_file_default
 
-
 - name: "Molecule | Verify | Assert default fail2ban service drop-in configuration file does not exists (if custom filename is used)"
   ansible.builtin.assert:
     that:
@@ -82,14 +81,12 @@
   when:
     - __run_fail2ban_config_service_dropin_file_path != __run_fail2ban_config_service_dropin_file_path_default
 
-
 ## Jail drop-in file
 
 - name: "Molecule | Verify | Check if fail2ban jail drop-in configuration file exists"
   ansible.builtin.stat:
     path: "{{ __run_fail2ban_config_jail_dropin_file_path }}"
   register: __testing_dropin_file
-
 
 - name: "Molecule | Verify | Assert fail2ban jail drop-in configuration file exists"
   ansible.builtin.assert:
@@ -110,7 +107,6 @@
     - __run_fail2ban_config_jail_dropin_file_path != __run_fail2ban_config_jail_dropin_file_path_default
   register: __testing_dropin_file_default
 
-
 - name: "Molecule | Verify | Assert default fail2ban jail drop-in configuration file does not exists (if custom filename is used)"
   ansible.builtin.assert:
     that:
@@ -124,12 +120,10 @@
   when:
     - __run_fail2ban_config_jail_dropin_file_path != __run_fail2ban_config_jail_dropin_file_path_default
 
-
 - name: "Molecule | Verify | Read jail drop-in config file content"
   ansible.builtin.slurp:
     src: "{{ __run_fail2ban_config_jail_dropin_file_path }}"
   register: __testing_jail_dropin_content
-
 
 - name: "Molecule | Verify | Set jail drop-in config file content as fact"
   ansible.builtin.set_fact:
@@ -164,7 +158,6 @@
     path: "{{ __testing_custom_filter_file_path }}"
   register: __testing_custom_filter_file
 
-
 - name: "Molecule | Verify | Assert custom filter config file exists"
   ansible.builtin.assert:
     that:
@@ -179,7 +172,6 @@
   ansible.builtin.slurp:
     src: "{{ __testing_custom_filter_file_path }}"
   register: __testing_custom_filter_content
-
 
 - name: "Molecule | Verify | Set custom filter config file content as fact"
   ansible.builtin.set_fact:
@@ -210,7 +202,6 @@
     path: "{{ __testing_custom_action_file_path }}"
   register: __testing_custom_action_file
 
-
 - name: "Molecule | Verify | Assert custom action config file exists"
   ansible.builtin.assert:
     that:
@@ -225,7 +216,6 @@
   ansible.builtin.slurp:
     src: "{{ __testing_custom_action_file_path }}"
   register: __testing_custom_action_content
-
 
 - name: "Molecule | Verify | Set custom action config file content as fact"
   ansible.builtin.set_fact:
@@ -258,7 +248,6 @@
     var: ansible_facts['services']
     verbosity: 3
 
-
 - name: "Molecule | Verify | Assert Fail2ban service is running"
   ansible.builtin.assert:
     that:
@@ -266,7 +255,6 @@
       - ansible_facts['services'][__run_fail2ban_fail2ban_servicename]['state'] == 'running'
     fail_msg: "Fail2ban service '{{ __run_fail2ban_fail2ban_servicename }}' is not running"
     success_msg: "Fail2ban service '{{ __run_fail2ban_fail2ban_servicename }}' is running"
-
 
 ## Effective protection state
 #
@@ -285,19 +273,19 @@
     argv:
       - "{{ __run_fail2ban_client_exec_path }}"
       - "ping"
+  changed_when:
+    - false
+
   register: __testing_fail2ban_ping
-  changed_when: false
-
-
 - name: "Molecule | Verify | Get the jails the running Fail2ban server has active"
   ansible.builtin.command:
     argv:
       - "{{ __run_fail2ban_client_exec_path }}"
       - "status"
+  changed_when:
+    - false
+
   register: __testing_fail2ban_status
-  changed_when: false
-
-
 - name: "Molecule | Verify | Get the effective maxretry of the sshd jail from the running server"
   ansible.builtin.command:
     argv:
@@ -305,10 +293,10 @@
       - "get"
       - "sshd"
       - "maxretry"
+  changed_when:
+    - false
+
   register: __testing_fail2ban_sshd_maxretry
-  changed_when: false
-
-
 - name: "Molecule | Verify | Assert the running server is protecting the host with the configured settings"
   ansible.builtin.assert:
     that:
@@ -337,7 +325,6 @@
     src: "{{ __run_fail2ban_config_service_dropin_file_path }}"
   register: __testing_service_dropin_content
 
-
 - name: "Molecule | Verify | Set service drop-in config file content as fact"
   ansible.builtin.set_fact:
     __testing_service_dropin_decoded: >-
@@ -364,13 +351,12 @@
     argv:
       - "{{ __run_fail2ban_client_exec_path }}"
       - "-d"
-  register: __testing_fail2ban_config_validation
   changed_when:
     - false
   failed_when:
     - __testing_fail2ban_config_validation is ansible.builtin.failed
 
-
+  register: __testing_fail2ban_config_validation
 - name: "Molecule | Verify | Assert fail2ban configuration is valid"
   ansible.builtin.assert:
     that:
@@ -388,7 +374,6 @@
   when:
     - (ansible_facts['os_family'] | ansible.builtin.lower) == 'redhat'
   block:
-
     - name: "Install dependencies needed for package_facts on Fedora"
       ansible.builtin.package:
         name:
@@ -398,11 +383,9 @@
       when:
         - (ansible_facts['distribution'] | ansible.builtin.lower) == 'fedora'
 
-
     - name: "Molecule | Verify | Gather package facts"
       ansible.builtin.package_facts:
         manager: "auto"
-
 
     - name: "Molecule | Verify | Assert backend-specific package is installed on Red Hat platforms"
       ansible.builtin.assert:
@@ -434,7 +417,6 @@
     __testing_stale_action_path: "{{ __run_fail2ban_config_action_dropin_dir_path }}/molecule-stale-action.local"
     __testing_decoy_filter_path: "{{ __run_fail2ban_config_filter_dropin_dir_path }}/molecule-admin-filter.local"
   block:
-
     - name: "Molecule | Verify | Plant stale marker-bearing files and a hand-made decoy"
       ansible.builtin.copy:
         content: "{{ item['content'] }}"
@@ -464,12 +446,11 @@
         name: "foundata.fail2ban.run"
 
     - name: "Molecule | Verify | Flush the handlers notified by the cleanup"
-      ansible.builtin.meta: flush_handlers
+      ansible.builtin.meta: "flush_handlers"
 
     - name: "Molecule | Verify | Get the status of the planted and declared files after the re-run"
       ansible.builtin.stat:
         path: "{{ item }}"
-      register: __testing_reap_stat
       loop:
         - "{{ __testing_stale_filter_path }}"
         - "{{ __testing_stale_action_path }}"
@@ -477,6 +458,7 @@
         - "{{ __testing_custom_filter_file_path }}"
         - "{{ __testing_custom_action_file_path }}"
 
+      register: __testing_reap_stat
     - name: "Molecule | Verify | Assert only the stale marker-bearing files were removed"
       ansible.builtin.assert:
         that:
@@ -495,7 +477,6 @@
           decoy and the declared custom filter and action files untouched.
 
   always:
-
     - name: "Molecule | Verify | Remove the planted files again"
       ansible.builtin.file:
         path: "{{ item }}"
@@ -504,7 +485,6 @@
         - "{{ __testing_stale_filter_path }}"
         - "{{ __testing_stale_action_path }}"
         - "{{ __testing_decoy_filter_path }}"
-
 
 ## Regression: broken failregex in a managed custom filter must fail validation
 #
@@ -518,7 +498,6 @@
   vars:
     __testing_broken_filter_path: "{{ __run_fail2ban_config_filter_dropin_dir_path }}/molecule-broken-regex.local"
   block:
-
     - name: "Molecule | Verify | Save the converge custom filters"
       ansible.builtin.set_fact:
         __testing_customfilters_saved: "{{ run_fail2ban_custom_filters | ansible.builtin.default({}) }}"
@@ -537,7 +516,7 @@
         name: "foundata.fail2ban.run"
 
     - name: "Molecule | Verify | Run the validation handlers against the broken filter"
-      ansible.builtin.meta: flush_handlers
+      ansible.builtin.meta: "flush_handlers"
 
     - name: "Molecule | Verify | Fail because the broken failregex was accepted"
       ansible.builtin.fail:
@@ -546,7 +525,6 @@
           be compiled, so a silently broken jail would reach the service.
 
   rescue:
-
     - name: "Molecule | Verify | Assert the run failed in the filter compilation"
       ansible.builtin.assert:
         that:
@@ -559,7 +537,6 @@
         success_msg: "A broken failregex is rejected by the validation handlers before the restart."
 
   always:
-
     - name: "Molecule | Verify | Restore the converge custom filters"
       ansible.builtin.set_fact:
         run_fail2ban_custom_filters: "{{ __testing_customfilters_saved }}"
@@ -574,8 +551,8 @@
         argv:
           - "/usr/bin/fail2ban-client"
           - "status"
-      changed_when: false
-
+      changed_when:
+        - false
 
 ## Init-only merged variable evaluation
 #
@@ -591,7 +568,6 @@
 
 - name: "Molecule | Verify | Validate effective merged variables (init-only)"
   block:
-
     - name: "Molecule | Verify | Set controlled inputs for the merge checks"
       ansible.builtin.set_fact:
         run_fail2ban_service_settings:
@@ -609,14 +585,12 @@
         tasks_from: "init"
         public: true
 
-
     - name: "Molecule | Verify | Assert effective service settings merged correctly"
       ansible.builtin.assert:
         that:
           - __run_fail2ban_effective_service_settings['DEFAULT']['loglevel'] == "DEBUG"
         fail_msg: "__run_fail2ban_effective_service_settings did not merge the user service settings as expected."
         success_msg: "__run_fail2ban_effective_service_settings merged the user service settings correctly."
-
 
     - name: "Molecule | Verify | Assert effective jail settings merged correctly"
       ansible.builtin.assert:
@@ -642,7 +616,6 @@
       when:
         - (ansible_facts['os_family'] | ansible.builtin.lower) == "redhat"
 
-
     - name: "Molecule | Verify | Assert detected backends reflect the merged jail settings"
       ansible.builtin.assert:
         that:
@@ -652,7 +625,6 @@
           - "'polling' in __run_fail2ban_detected_backends"
         fail_msg: "__run_fail2ban_detected_backends did not reflect the merged jail settings."
         success_msg: "__run_fail2ban_detected_backends correctly reflects the merged jail settings."
-
 
 ## Configuration validation before restart
 #
@@ -670,7 +642,6 @@
   vars:
     __testing_broken_jail_path: "{{ __run_fail2ban_config_jail_dropin_dir_path }}/00-molecule-broken.local"
   block:
-
     - name: "Molecule | Verify | Plant a jail referencing a filter that does not exist"
       ansible.builtin.copy:
         content: |
@@ -686,7 +657,7 @@
         - "run_fail2ban: restart fail2ban.service"
 
     - name: "Molecule | Verify | Run the validation handler against the broken configuration"
-      ansible.builtin.meta: flush_handlers
+      ansible.builtin.meta: "flush_handlers"
 
     - name: "Molecule | Verify | Fail because the broken configuration was accepted"
       ansible.builtin.fail:
@@ -695,7 +666,6 @@
           so a broken configuration would reach the service restart.
 
   rescue:
-
     - name: "Molecule | Verify | Assert the run failed in the validation handler"
       ansible.builtin.assert:
         that:
@@ -706,7 +676,6 @@
         success_msg: "A broken configuration is rejected by the validation handler before the service is restarted."
 
   always:
-
     - name: "Molecule | Verify | Remove the broken jail again"
       ansible.builtin.file:
         path: "{{ __testing_broken_jail_path }}"
@@ -718,7 +687,6 @@
     # would fire after the uninstall block below has removed Fail2ban.
     - name: "Molecule | Verify | Run the remaining notified handlers against the restored configuration"
       ansible.builtin.meta: "flush_handlers"
-
 
 ## Uninstall (state "absent") verification
 #
@@ -740,10 +708,7 @@
       failregex = ^historical$
     owner: "root"
     group: "root"
-    mode: "u=rw,g=r,o=r"
-
-
-# An administrator's own drop-in (no ownership marker): the sweep must leave
+    mode: "u=rw,g=r,o=r" # 0644; An administrator's own drop-in (no ownership marker): the sweep must leave
 # it alone even though it lives in a managed directory. The content mentions
 # the marker as a substring on purpose: ownership requires the exact marker
 # line, a mere mention (e.g. quoted in a comment) must not get the file
@@ -759,9 +724,7 @@
       enabled = false
     owner: "root"
     group: "root"
-    mode: "u=rw,g=r,o=r"
-
-
+    mode: "u=rw,g=r,o=r" # 0644
 - name: "Molecule | Verify | Uninstall: run the role with state 'absent'"
   ansible.builtin.include_role:
     name: "foundata.fail2ban.run"
@@ -770,11 +733,9 @@
     run_fail2ban_config_service_dropin_file_name: "99-custom-dropin-service.local"
     run_fail2ban_config_jail_dropin_file_name: "99-custom-dropin-jail.local"
 
-
 - name: "Molecule | Verify | Uninstall: check the role-managed files are gone"
   ansible.builtin.stat:
     path: "{{ item }}"
-  register: __testing_uninstall_gone_stat
   failed_when:
     - __testing_uninstall_gone_stat['stat']['exists']
   loop:
@@ -783,15 +744,14 @@
     - "/etc/fail2ban/filter.d/renamed-historical.local"
     - "/usr/bin/fail2ban-server"
 
-
+  register: __testing_uninstall_gone_stat
 - name: "Molecule | Verify | Uninstall: check the administrator's file survived"
   ansible.builtin.stat:
     path: "/etc/fail2ban/jail.d/98-admin-own.local"
-  register: __testing_uninstall_admin_stat
   failed_when:
     - not __testing_uninstall_admin_stat['stat']['exists']
 
-
+  register: __testing_uninstall_admin_stat
 - name: "Molecule | Verify | Uninstall: remove the administrator-owned test file"
   ansible.builtin.file:
     path: "/etc/fail2ban/jail.d/98-admin-own.local"
