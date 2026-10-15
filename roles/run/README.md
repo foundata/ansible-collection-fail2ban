@@ -5,7 +5,10 @@ SPDX-FileCopyrightText: foundata GmbH <https://foundata.com>
 SPDX-License-Identifier: GPL-3.0-or-later
 -->
 
-The `foundata.fail2ban.run` Ansible role (part of the `foundata.fail2ban` Ansible collection). It provides automated management of [fail2ban](https://github.com/fail2ban/fail2ban) configuration and service state.
+The `foundata.fail2ban.run` Ansible role (part of the `foundata.fail2ban`
+Ansible collection). It provides automated management of
+[fail2ban](https://github.com/fail2ban/fail2ban) configuration and service
+state.
 
 
 
@@ -33,15 +36,21 @@ The `foundata.fail2ban.run` Ansible role (part of the `foundata.fail2ban` Ansibl
 
 ## Features<a id="features"></a>
 
-* Custom filters and actions:
-  * Define custom fail2ban filters and actions as simple YAML dictionaries or raw content.
-* Sane defaults (see `__run_fail2ban_jail_settings_defaults` in [`./vars/main.yml`](./vars/main.yml) for a complete list)
-  * Platform-aware ban actions (`nftables`, `firewalld`, `ufw)` and log backends (`systemd` journal).
-  * Built-in `sshd` jail enabled out of the box.
-* Preserve distribution defaults by managing only drop-in configuration files in `/etc/fail2ban/fail2ban.d/` and `/etc/fail2ban/jail.d/`, ensuring compatibility across a wide range of distributions.
-* Simple configuration with a layered merge system:
-  * Internal defaults, platform-specific overrides, and user settings are merged automatically.
-  * User-provided values always take highest priority.
+- Custom filters and actions:
+  - Define custom fail2ban filters and actions as simple YAML dictionaries or
+    raw content.
+- Sane defaults (see `__run_fail2ban_jail_settings_defaults` in
+  [`./vars/main.yml`](./vars/main.yml) for a complete list)
+  - Platform-aware ban actions (`nftables`, `firewalld`, `ufw)` and log backends
+    (`systemd` journal).
+  - Built-in `sshd` jail enabled out of the box.
+- Preserve distribution defaults by managing only drop-in configuration files in
+  `/etc/fail2ban/fail2ban.d/` and `/etc/fail2ban/jail.d/`, ensuring
+  compatibility across a wide range of distributions.
+- Simple configuration with a layered merge system:
+  - Internal defaults, platform-specific overrides, and user settings are merged
+    automatically.
+  - User-provided values always take highest priority.
 
 
 
@@ -81,7 +90,8 @@ Uninstall:
         run_fail2ban_state: "absent"
 ```
 
-Installation with custom jail settings (overriding defaults) and a custom filter:
+Installation with custom jail settings (overriding defaults) and a custom
+filter:
 
 ```yaml
 ---
@@ -147,13 +157,18 @@ Installation with a custom action using raw content:
 
 It might be useful and faster to only call parts of the role by using tags:
 
-- `run_fail2ban_setup`: Manage basic resources, such as packages or service users.
-- `run_fail2ban_config`: Manage settings, such as adapting or creating configuration files.
-- `run_fail2ban_service`: Manage services and daemons, such as running states and service boot configurations.
+- `run_fail2ban_setup`: Manage basic resources, such as packages or service
+  users.
+- `run_fail2ban_config`: Manage settings, such as adapting or creating
+  configuration files.
+- `run_fail2ban_service`: Manage services and daemons, such as running states
+  and service boot configurations.
 
-There are also tags that are generally not intended to be called directly but are included for completeness and to cover edge cases:
+There are also tags that are generally not intended to be called directly but
+are included for completeness and to cover edge cases:
 
-- `run_fail2ban_always`, `always`: Tasks needed by the role itself for internal role setup and the Ansible environment.
+- `run_fail2ban_always`, `always`: Tasks needed by the role itself for internal
+  role setup and the Ansible environment.
 
 
 <!-- ANSIBLE DOCSMITH MAIN START -->
@@ -613,7 +628,8 @@ See `dependencies` in [`meta/main.yml`](./meta/main.yml).
 
 ## Compatibility<a id="compatibility"></a>
 
-See `min_ansible_version` in [`meta/main.yml`](./meta/main.yml) and `__run_fail2ban_supported_platforms` in [`vars/main.yml`](./vars/main.yml).
+See `min_ansible_version` in [`meta/main.yml`](./meta/main.yml) and
+`__run_fail2ban_supported_platforms` in [`vars/main.yml`](./vars/main.yml).
 
 
 
