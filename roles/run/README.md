@@ -175,7 +175,7 @@ are included for completeness and to cover edge cases:
 
 ## Role variables<a id="variables"></a>
 
-Main entry point for the foundata.fail2ban.run role
+Main entry point for the foundata.fail2ban.run role.
 
 Manage the Fail2Ban intrusion prevention system
 
@@ -184,8 +184,8 @@ The following variables can be configured for this role:
 |                    Variable                    |  Type  | Required |       Default        | Description (abstract) |
 | ---------------------------------------------- | ------ | -------- | -------------------- | ---------------------- |
 | `run_fail2ban_state`                           | `str`  | No       | `"present"`          | Determines whether the managed resources should be `present` or `absent`.<br><br>`present` ensures that required components, such as software packages, are installed and configured.<br><br>`absent` reverts changes as much as possible, such as […](#variable-run_fail2ban_state) |
-| `run_fail2ban_autoupgrade`                     | `bool` | No       | `false`              | If set to `true`, all managed packages will be upgraded during each Ansible run (e.g., when the package provider detects a newer version than the currently installed one). |
-| `run_fail2ban_service_state`                   | `str`  | No       | `"enabled"`          | Defines the status of the service(s).<br><br>`enabled`: Service is running and will start automatically at boot.<br><br>`disabled`: Service is stopped and will not start automatically at boot.<br><br>`running` Service is running but will not start […](#variable-run_fail2ban_service_state) |
+| `run_fail2ban_autoupgrade`                     | `bool` | No       | `false`              | If set to `true`, each Ansible run upgrades the managed packages to the newest version the package provider offers. |
+| `run_fail2ban_service_state`                   | `str`  | No       | `"enabled"`          | Defines the status of the service(s). Possible values:<br><br>- `enabled`: Service is running and will start automatically at boot. - `disabled`: Service is stopped and will not start automatically at boot. - `running`: Service is running but will […](#variable-run_fail2ban_service_state) |
 | `run_fail2ban_service_settings`                | `dict` | No       | `{}`                 | Fail2ban service configuration values.<br><br>These settings are placed in a drop-in configuration file in `/fail2ban.d`. They take highest priority, overriding internal defaults (see `__run_fail2ban_service_settings_defaults` in `vars/main.yml`) and […](#variable-run_fail2ban_service_settings) |
 | `run_fail2ban_config_service_dropin_file_name` | `str`  | No       | `"99-managed.local"` | Filename of the drop-in configuration file to be placed in `/fail2ban.d`. Defaults to `99-managed.local`. The `99-` prefix in combination with the `.local` extension ensures later loading and thus higher precedence over files with lower-numbered […](#variable-run_fail2ban_config_service_dropin_file_name) |
 | `run_fail2ban_jail_settings`                   | `dict` | No       | `{}`                 | Fail2ban jail configuration values.<br><br>These settings are placed in a drop-in configuration file in `/jail.d`. They take highest priority, overriding internal defaults (see `__run_fail2ban_jail_settings_defaults` in `vars/main.yml`) and […](#variable-run_fail2ban_jail_settings) |
@@ -203,7 +203,7 @@ Determines whether the managed resources should be `present` or `absent`.
 installed and configured.
 
 `absent` reverts changes as much as possible, such as removing packages,
-deleting created users, stopping services, restoring modified settings, …
+deleting created users, stopping services and restoring modified settings.
 
 - **Type**: `str`
 - **Required**: No
@@ -216,9 +216,8 @@ deleting created users, stopping services, restoring modified settings, …
 
 [*⇑ Back to ToC ⇑*](#toc)
 
-If set to `true`, all managed packages will be upgraded during each Ansible
-run (e.g., when the package provider detects a newer version than the
-currently installed one).
+If set to `true`, each Ansible run upgrades the managed packages to the
+newest version the package provider offers.
 
 - **Type**: `bool`
 - **Required**: No
@@ -230,23 +229,19 @@ currently installed one).
 
 [*⇑ Back to ToC ⇑*](#toc)
 
-Defines the status of the service(s).
+Defines the status of the service(s). Possible values:
 
-`enabled`: Service is running and will start automatically at boot.
+- `enabled`: Service is running and will start automatically at boot.
+- `disabled`: Service is stopped and will not start automatically at boot.
+- `running`: Service is running but will not start automatically at boot.
+  This can be used to start a service on the first Ansible run without
+  enabling it for boot.
+- `unmanaged`: Ansible does not manage the service at all: both the
+  running state and the boot (enablement) state are left exactly as they
+  are. This is primarily useful when services are monitored and managed
+  by systems other than Ansible.
 
-`disabled`: Service is stopped and will not start automatically at boot.
-
-`running` Service is running but will not start automatically at boot.
-This can be used to start a service on the first Ansible run without
-enabling it for boot.
-
-`unmanaged`: Ansible does not manage the service at all: both the
-running state and the boot (enablement) state are left exactly as they
-are. This is primarily useful when services are monitored and managed
-by systems other than Ansible.
-
-The singular form (`service`) is used for simplicity. However, the defined
-status applies to all services if multiple are being managed by this role.
+The defined status applies to all services if the role manages several.
 
 - **Type**: `str`
 - **Required**: No
