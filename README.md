@@ -43,9 +43,8 @@ to ban hosts that cause multiple authentication errors.
 ### Role: `foundata.fail2ban.run`
 
 The primary role in this collection to configure and maintain Fail2Ban,
-including jail configuration, filters, actions, and related settings.
-[Its `README.md`](./roles/run/README.md) covers configuration, usage examples,
-and more:
+including jail configuration, filters, actions, and related settings. [Its
+`README.md`](./roles/run/README.md) covers configuration and usage examples.
 
 <!-- ANSIBLE DOCSMITH TOC-FULL run START -->
 - [Ansible role: `foundata.fail2ban.run`](./roles/run/README.md#ansible-role-foundatafail2banrun)
